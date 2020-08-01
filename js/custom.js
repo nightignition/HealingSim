@@ -75,8 +75,9 @@ $(document).ready(function()
 	};
 	var boss_abilities = 
 	[
-		{name: 'melee', start: 1, time: 1.5, delay: 0, dmg: 1500, crit: 20, targets: 1},
-		{name: 'Impending Doom', start: 10, time: 20, delay: 10, dmg: 2000, crit: 0, targets: "all"}
+		{name: 'melee', start: 1, time: 1.5, delay: 0, dmg: 1500, crit: 20, targets: 1, targetRole: ""},
+		{name: 'cleave', start: 1, time: 1.5, delay: 0, dmg: 750, crit: 20, targets: 2, targetRole: "melee"},
+		{name: 'Impending Doom', start: 10, time: 20, delay: 10, dmg: 2000, crit: 0, targets: "all", targetRole: ""}
 	];
 	var spells = 
 	[
@@ -85,7 +86,6 @@ $(document).ready(function()
 	var panels;
 
 	initHealingFrame();
-	initBoss();
 	initFight();
 
 	/* 
@@ -118,17 +118,6 @@ $(document).ready(function()
 
 	/* 
 
-	3. Init Boss
-
-	*/
-
-	function initBoss()
-	{
-
-	}
-
-	/* 
-
 	4. Init Fight
 
 	*/
@@ -148,9 +137,12 @@ $(document).ready(function()
 	function startAbilityInterval(val)
 	{
 		var targetCount = val.targets;
+
+		// Single target
 		if(targetCount === 1)
 		{
-			setInterval(function()
+			var singleTargetInterval;
+			singleTargetInterval = setInterval(function()
 			{
 				if(target !== "")
 				{
@@ -180,76 +172,158 @@ $(document).ready(function()
 					
 			}, val.time*1000);
 		}
+		// All targets
 		else if(targetCount === "all")
 		{
-			setInterval(function()
+			var allTargetsInterval;
+			allTargetsInterval = setInterval(function()
 			{
-				$.each(players, function(x, player)
+				var c = getAlivePlayersCount();
+				if(c > 0)
 				{
-					if(player.status === "alive")
+					$.each(players, function(x, player)
 					{
-						var hp = player.health - val.dmg;
-						player.health = hp;
-						console.log("Target: " + player.name)
+						if(player.status === "alive")
+						{
+							var hp = player.health - val.dmg;
+							player.health = hp;
+							console.log("Target: " + player.name)
+							console.log("Target health: "+hp);
+							console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
+							output.prepend(player.name + " takes "+ val.dmg + "damage from " + val.name + "!" + "\n");
+							if(player.health > 0)
+							{
+								updatePanels(player);
+							}
+							else
+							{
+								player.status = "dead";
+								player.health = 0;
+								console.log("Target is Dead!");
+								updatePanels(player);
+							}
+							updatePanels(player);
+						}
+					});
+				}
+				else
+				{
+					clearInterval(allTargetsInterval);
+				}
+			}, val.time*1000);
+		}
+		// Multi target
+		else
+		{
+			var multiTargetInterval;
+			var targets;
+			multiTargetInterval = setInterval(function()
+			{
+				var targetCount = val.targets;
+				var alivePlayersCount = getAlivePlayersCount();
+
+				if(alivePlayersCount > 0)
+				{
+					if(alivePlayersCount < targetCount)
+					{
+						targetCount = alivePlayersCount;
+					}
+					var selected = getTargets(targetCount)
+					$.each(selected, function(a, b)
+					{
+						console.log(b);
+						var plr = b;
+						var hp = plr.health - val.dmg;
+						plr.health = hp;
+						console.log("Target: " + plr.name)
 						console.log("Target health: "+hp);
 						console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
-						output.prepend(player.name + " takes "+ val.dmg + "damage from " + val.name + "!" + "\n");
-						if(player.health > 0)
+						output.prepend(plr.name + " takes "+ val.dmg + "damage from " + val.name + "!" + "\n");
+
+						if(plr.health > 0)
 						{
-							updatePanels(player);
+							updatePanels(plr);
 						}
 						else
 						{
-							player.status = "dead";
-							player.health = 0;
+							plr.status = "dead";
+							plr.health = 0;
 							console.log("Target is Dead!");
-							updatePanels(player);
-							player = "";
+							updatePanels(plr);
+							plr = "";
 							bossPickTarget();
 							clearInterval();
 						}
-						updatePanels(player);
-					}
-				});
-				if(target !== "")
-				{
-					
+						updatePanels(plr);
+					});
 				}
-					
+				else
+				{
+					clearInterval(multiTargetInterval);
+				}	
+				
 			}, val.time*1000);
 		}
-		else
+	}
+
+	function processDmg(p, val)
+	{
+		console.log(p.name);
+		var hp = p.health - val.dmg;
+		p.health = hp;
+		console.log("Target: " + p.name)
+		console.log("Target health: "+hp);
+		console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
+		output.prepend(p.name + " takes "+ val.dmg + "damage from " + val.name + "!" + "\n");
+		updatePanels(p);
+	}
+
+	function getAlivePlayersCount()
+	{
+		var retValue = 0;
+		$.each(players, function(x, player)
 		{
-			setInterval(function()
+			if(player.status === "alive")
 			{
-				var targets = getTargets(targetCount);
-				if(target !== "")
-				{
-					var hp = target.health - val.dmg;
-					target.health = hp;
-					console.log("Target: " + target.name)
-					console.log("Target health: "+hp);
-					console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
-					output.prepend(target.name + " takes "+ val.dmg + "damage from " + val.name + "!" + "\n");
-					if(target.health > 0)
-					{
-						updatePanels(target);
-					}
-					else
-					{
-						target.status = "dead";
-						target.health = 0;
-						console.log("Target is Dead!");
-						updatePanels(target);
-						target = "";
-						bossPickTarget();
-						clearInterval();
-					}
-					updatePanels(target);
-				}
-					
-			}, val.time*1000);
+				retValue++;
+			}
+		});
+		return retValue;
+	}
+
+	function getTargets(t)
+	{
+		var isAlive = [];
+		var isAliveId = [];
+		$.each(players, function(x, val)
+		{
+			if(val.status === "alive")
+			{
+				isAlive.push(val);
+				isAliveId.push(val.id);
+			}
+		});
+
+		console.log(isAliveId);
+		
+		var arr = [];
+		var a = isAlive.length;
+		console.log(a);
+		while(arr.length < isAlive.length)
+		{
+		    var r = Math.floor(Math.random() * a - 1) + 1;
+		    if(arr.indexOf(r) === -1) arr.push(r);
 		}
+
+		var returnArr = [];
+		for(var yyy = 0; yyy < t; yyy++)
+		{
+			var yNum = arr[yyy];
+			console.log(yNum);
+			returnArr.push(isAlive[yNum]);
+		}
+
+		return returnArr;
 	}
 
 	function updatePanels(tgt)
@@ -321,49 +395,11 @@ $(document).ready(function()
 		});
 	}
 
-	function getTargets(targetCount)
-	{
-		var targets = [];
-		var targetsAlive = getLiving();
-		if(targetCount > targetsAlive)
-		{
-			targetCount = targetsAlive;
-		}
-		while(targets.length < targetCount)
-		{
-			var r = Math.floor(Math.random() * 40) + 1;
-    		if(targets.indexOf(r) === -1) targets.push(r);
-		}
-		console.log(targets);
-		return targets;
-	}
-
-	function getLiving()
-	{
-		var count = 0;
-		$.each(players, function(x, val)
-		{
-			if(val.status === "alive")
-			{
-				count++;
-			}
-		});
-		return count;
-	}
-
 	function initHeal(pnl, i)
 	{
 		if(!isCasting)
 		{
 			var player = players[i];
-			var currentHealth = players[i].health;
-			var maxHealth = players[i].healthMax;
-			var healAmount = 2500;
-			var newHealth = currentHealth + healAmount;
-			if(newHealth > maxHealth)
-			{
-				newHealth = maxHealth;
-			}
 			isCasting = true;
 			$('.cast_bar')
 			$('.cast_bar_progress').animate(
@@ -373,19 +409,68 @@ $(document).ready(function()
 			{
 				duration: 1500,
 				easing: 'linear',
-				done: function()
+				start: function()
+				{
+					$('.cast_bar').css({background: '#000000'});
+					$('.cast_bar_text').text("Casting Flash of Light");
+				},
+				step: function()
+				{
+					if(player.status !== "alive")
+					{
+						$('.cast_bar_progress').css({width: 0});
+						$('.cast_bar_text').text("");
+						$('.cast_bar').css({background: 'transparent'});
+						isCasting = false;
+						$(this).stop(false, false);
+					}
+				},
+				complete: function()
 				{
 					isCasting = false;
 					$('.cast_bar_progress').css({width: 0});
-					if(players[i].status === "alive")
+					if(player.status === "alive")
 					{
-						players[i].health = newHealth;
-						updatePanels(players[i]);
-						output.prepend(players[i].name + " got healed for " + healAmount + "\n");
+						var currentHealth = player.health;
+						var maxHealth = player.healthMax;
+						var healAmount = 2500;
+						var overheal = 0;
+						var actualHealAmount = 0;
+						var newHealth = currentHealth + healAmount;
+						if(newHealth > maxHealth)
+						{
+							overheal = newHealth - maxHealth;
+							actualHealAmount = healAmount - overheal;
+							newHealth = maxHealth;
+						}
+						else
+						{
+							actualHealAmount = healAmount;
+							newHealth = currentHealth + healAmount;
+						}
+						player.health = newHealth;
+						updatePanels(player);
+						$('.cast_bar_text').text("");
+						$('.cast_bar').css({background: 'transparent'});
+						if(overheal > 0)
+						{
+							output.prepend(player.name + " got healed for " + actualHealAmount + " (" + overheal + " overhealed)" + "\n");
+						}
+						else
+						{
+							output.prepend(player.name + " got healed for " + actualHealAmount + "\n");
+						}
 					}
 						
 				}
-			});
+			})
+			.animate(
+				{
+					width: '0%'
+				},
+				{
+					duration: 0
+				});
 		}
 	}
 
