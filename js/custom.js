@@ -25,6 +25,9 @@ $(document).ready(function()
 	var start = $('.start');
 	var isRunning = false;
 	var isCasting = false;
+	var singleTargetInterval;
+	var allTargetsInterval;
+	var multiTargetInterval;
 	var target = "";
 	var players = 
 	[
@@ -101,19 +104,54 @@ $(document).ready(function()
 			var newPanel = '<div class="h_panel '+ players[x].class +'"><div class="health_overlay"></div><span>'+ players[x].name +'</span></div>';
 			healing_frame.append(newPanel);
 
-			$('.h_panel').on('click', function(event)
+			$('.h_panel').bind('contextmenu', function(e)
 			{
-				event.stopPropagation();
-    			event.stopImmediatePropagation();
-				var pnl = event.target;
-				var i = $(this).index();
-				if(players[i].status === "alive")
-				{
-					initHeal(pnl, i);
-				}
+				return false;
 			});
 		}
 		panels = $('.h_panel');
+
+		// $('.h_panel').on('click', function(event)
+		// {
+		// 	event.stopPropagation();
+		// 	event.stopImmediatePropagation();
+		// 	var pnl = event.target;
+		// 	var i = $(this).index();
+		// 	if(players[i].status === "alive")
+		// 	{
+		// 		initHeal(pnl, i);
+		// 	}
+		// });
+
+		$('.h_panel').on('mousedown', function(event)
+		{
+			event.stopPropagation();
+			event.stopImmediatePropagation();
+			var pnl = event.target;
+			var i = $(this).index();
+			var healAmount;
+			var castTime;
+
+			switch(event.which)
+			{
+				case 1:
+					if(players[i].status === "alive")
+					{
+						castTime = 1500;
+						healAmount = 1500;
+						initHeal(pnl, i, castTime, healAmount);
+					}
+					break;
+				case 2:
+					
+					break;
+				case 3:
+					castTime = 2500;
+					healAmount = 3500;
+					initHeal(pnl, i, castTime, healAmount);
+					break;
+			}
+		});
 	}
 
 	/* 
@@ -141,7 +179,6 @@ $(document).ready(function()
 		// Single target
 		if(targetCount === 1)
 		{
-			var singleTargetInterval;
 			singleTargetInterval = setInterval(function()
 			{
 				if(target !== "")
@@ -175,7 +212,6 @@ $(document).ready(function()
 		// All targets
 		else if(targetCount === "all")
 		{
-			var allTargetsInterval;
 			allTargetsInterval = setInterval(function()
 			{
 				var c = getAlivePlayersCount();
@@ -215,7 +251,6 @@ $(document).ready(function()
 		// Multi target
 		else
 		{
-			var multiTargetInterval;
 			var targets;
 			multiTargetInterval = setInterval(function()
 			{
@@ -395,24 +430,25 @@ $(document).ready(function()
 		});
 	}
 
-	function initHeal(pnl, i)
+	function initHeal(pnl, i, castTime, healAmount)
 	{
 		if(!isCasting)
 		{
 			var player = players[i];
 			isCasting = true;
+			var cTime = (castTime / 1000) + "s";
 			$('.cast_bar')
 			$('.cast_bar_progress').animate(
 			{
 				width: '100%'
 			},
 			{
-				duration: 1500,
+				duration: castTime,
 				easing: 'linear',
 				start: function()
 				{
 					$('.cast_bar').css({background: '#000000'});
-					$('.cast_bar_text').text("Casting Flash of Light");
+					$('.cast_bar_text').text("Casting Flash of Light " + cTime);
 				},
 				step: function()
 				{
@@ -433,7 +469,7 @@ $(document).ready(function()
 					{
 						var currentHealth = player.health;
 						var maxHealth = player.healthMax;
-						var healAmount = 2500;
+						// var healAmount = 2500;
 						var overheal = 0;
 						var actualHealAmount = 0;
 						var newHealth = currentHealth + healAmount;
