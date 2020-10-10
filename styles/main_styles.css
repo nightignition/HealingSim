@@ -314,6 +314,23 @@ section
     user-select: none;
     z-index: 2;
 }
+.incoming_container
+{
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 100%;
+	width: 200px;
+	height: 100%;
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    overflow: auto;
+    z-index: 1;
+}
 .incoming
 {
 	display: block;
@@ -326,7 +343,6 @@ section
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    z-index: 1;
 }
 .warnings_container
 {

@@ -124,7 +124,7 @@ $(document).ready(function()
 	{
 		for(var x = 0; x < raid_size; x++)
 		{
-			var newPanel = '<div class="h_panel d-flex flex-row '+ players[x].class +'"><div class="health_overlay"></div><span>'+ players[x].name +'</span></div>';
+			var newPanel = '<div class="h_panel d-flex flex-row '+ players[x].class +'"><div class="health_overlay"><div class="incoming_container d-flex flex-row"></div></div><span>'+ players[x].name +'</span></div>';
 			healing_frame.append(newPanel);
 
 			$('.h_panel').bind('contextmenu', function(e)
@@ -287,13 +287,17 @@ $(document).ready(function()
 	{
 		start.on('click', function()
 		{
-			startAIHealing();
-			initHealingStats();
-			bossPickTarget();
-			$.each(boss_abilities, function(x, val)
+			if(!isRunning)
 			{
-				setTimeout(startAbilityInterval(val), val.delay * 1000);
-			});
+				isRunning = true;
+				startAIHealing();
+				initHealingStats();
+				bossPickTarget();
+				$.each(boss_abilities, function(x, val)
+				{
+					setTimeout(startAbilityInterval(val), val.delay * 1000);
+				});
+			}	
 		});
 	}
 
@@ -620,7 +624,7 @@ $(document).ready(function()
 				newHealth = currentHealth + healAmount.heal;
 			}
 
-
+			pnl = pnl.find('.incoming_container');
 			var currentInc = 0;
 			var incDivCount = pnl.find('.incoming').length;
 			var incDivClass = "incoming"+incDivCount.toString();
@@ -630,7 +634,7 @@ $(document).ready(function()
 			pnl.append(incDiv);
 			var inc = pnl.find('.'+incDivClass);
 			incDivToRemove = inc;
-			var incPerc = (((healAmount.heal / maxHealth) * 100) + "%");
+			var incPerc = (((healAmount.heal / maxHealth) * 100) + "px");
 			inc.css('width', incPerc);
 
 
@@ -664,22 +668,6 @@ $(document).ready(function()
 					$('.cast_bar_progress').css({width: 0});
 					if(player.status === "alive")
 					{
-						// var currentHealth = player.health;
-						// var maxHealth = player.healthMax;
-						// var overheal = 0;
-						// var actualHealAmount = 0;
-						// var newHealth = currentHealth + healAmount.heal;
-						// if(newHealth > maxHealth)
-						// {
-						// 	overheal = newHealth - maxHealth;
-						// 	actualHealAmount = healAmount.heal - overheal;
-						// 	newHealth = maxHealth;
-						// }
-						// else
-						// {
-						// 	actualHealAmount = healAmount.heal;
-						// 	newHealth = currentHealth + healAmount.heal;
-						// }
 						playerHealingDone = playerHealingDone + actualHealAmount;
 						players[29].healingDone = playerHealingDone;
 						player.health = newHealth;
@@ -770,8 +758,12 @@ $(document).ready(function()
 				{
 					var pnl = panels.get(healTarget.id);
 					var targetID = healTarget.id;
-					var healAmount = 850;
-					var castTime = 1500;
+					var spell = aiPickSpell(targetID);
+					var s = spells.find(x => x.name === spell);
+					// var healAmount = 850;
+					var healAmount = getHealAmount(s).heal;
+					console.log("--------------"+healAmount);
+					var castTime = s.castTime;
 					i.isHealing = true;
 					initAIHeal($(pnl), targetID, castTime, healAmount, i);
 				}
@@ -799,6 +791,22 @@ $(document).ready(function()
 		return healingTarget;
 	}
 
+	function aiPickSpell(targetID)
+	{
+		var targetHP = players[targetID].health;
+		var targetMissingHP = players[targetID].healthMax - targetHP;
+		var spell = "";
+		if(targetMissingHP > 1000)
+		{
+			spell = "Holy Light (Rank 6)";
+		}
+		else
+		{
+			spell = "Flash of Light (Rank 4)";
+		}
+		return spell;
+	}
+
 	function initAIHeal(pnl, targetID, castTime, healAmount, i)
 	{
 		var player = players[targetID];
@@ -807,21 +815,19 @@ $(document).ready(function()
 		var overheal = 0;
 		var actualHealAmount = 0;
 		var newHealth = currentHealth + healAmount;
-		// var inc = pnl.find('.incoming');
-		// var incPerc = ((newHealth / maxHealth) * 100) + "%";
-		// inc.css('width', incPerc);
 
-
+		pnl = pnl.find('.incoming_container');
 		var currentInc = 0;
 		var incDivCount = pnl.find('.incoming').length;
 		var incDivClass = "incoming"+incDivCount.toString();
 		var incDivClassFinal = "incoming "+incDivClass;
 		var incDiv = '<div class="' + incDivClassFinal +'"></div>';
 		var incDivToRemove;
+
 		pnl.append(incDiv);
 		var inc = pnl.find('.'+incDivClass);
 		incDivToRemove = inc;
-		var incPerc = (((healAmount / maxHealth) * 100) + "%");
+		var incPerc = (((healAmount / maxHealth) * 100) + "px");
 		inc.css('width', incPerc);
 
 
