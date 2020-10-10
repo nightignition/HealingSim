@@ -298,16 +298,38 @@ section
 	height: 50px;
 	width: 100px;
 	background: #a80a0a;
+	overflow: hidden;
 }
 .health_overlay
 {
 	display: block;
-	position: absolute;
-	top: 0;
-	left: 0;
 	width: 100%;
 	height: 100%;
 	background: #000;
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    z-index: 2;
+}
+.incoming
+{
+	display: block;
+	width: 0%;
+	height: 100%;
+	background: green;
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    z-index: 1;
+}
+.warnings_container
+{
 	-webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -347,6 +369,7 @@ section
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    z-index: 3;
 }
 /* Class colors */
 .warrior
@@ -469,4 +492,83 @@ section
 .cast_bar_text
 {
 	font-size: 13px;
+}
+.spells_and_stats_container
+{
+	position: absolute;
+	left: 50px;
+	top: 50px;
+}
+.spells_form
+{
+	margin-top: 15px;
+}
+.spell label, .stats_form label
+{
+	margin-left: 5px;
+}
+.apply_spells
+{
+	width: 75px;
+	height: 30px;
+	background: #fff;
+	line-height: 30px;
+	text-align: center;
+}
+.stats_form input
+{
+	width: 50px;
+}
+.warnings_container
+{
+	position: absolute;
+	left: 50%;
+	top: 400px;
+	-webkit-transform: translateX(-50%);
+	-moz-transform: translateX(-50%);
+	-ms-transform: translateX(-50%);
+	-o-transform: translateX(-50%);
+	transform: translateX(-50%);
+	width: 250px;
+}
+.warning
+{
+	width: 100%;
+	height: 35px;
+	background: rgba(255,255,255,0.15);
+}
+.warning div:first-of-type
+{
+	line-height: 35px;
+	padding-left: 10px;
+	z-index: 1;
+}
+.warning_progress
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 0;
+	height: 100%;
+	background: green;
+	z-index: 0;
+}
+.healing_stats
+{
+	position: absolute;
+	bottom: 50px;
+	right: 50px;
+	width: 380px;
+	height: auto;
+	background: black;
+}
+.healing_stats > textarea
+{
+	display: block;
+	width: 100%;
+	height: 250px;
+	background: #000000;
+	color: #07eb44;
+	font-size: 12px;
+	padding: 15px;
 }
