@@ -21,6 +21,7 @@ $(document).ready(function()
 
 	var output = $('#output');
 	var healingStatsOutput = $('#healing_stats');
+	var simTimer = $('#sim_timer');
 	var raid_size = 40;
 	var healing_frame = $('#healing_frame');
 	var start = $('.start');
@@ -33,9 +34,11 @@ $(document).ready(function()
 	var singleTargetInterval;
 	var allTargetsInterval;
 	var multiTargetInterval;
+	var healing_interval;
 	var warning_interval;
 	var target = "";
 	var playerHealingDone = 0;
+	var fightTimer = 120;
 	var players = 
 	[
 		{id: '0', name: 'Madwall', class:'warrior', role: 'mt', status:'alive', health: 8000, healthMax: 8000},
@@ -151,7 +154,7 @@ $(document).ready(function()
 				case 1:
 					// Left Mouse Button
 
-					if(players[i].status === "alive")
+					if(players[i].status === "alive" && isRunning)
 					{
 						castTime = lmb_spell.castTime;
 						healAmount = getHealAmount(lmb_spell);
@@ -165,7 +168,7 @@ $(document).ready(function()
 				case 3:
 					// Right Mouse Button
 
-					if(players[i].status === "alive")
+					if(players[i].status === "alive" && isRunning)
 					{
 						castTime = rmb_spell.castTime;
 						healAmount = getHealAmount(rmb_spell);
@@ -289,6 +292,16 @@ $(document).ready(function()
 			if(!isRunning)
 			{
 				isRunning = true;
+				var sim_timer = simTimer.val();
+				setTimeout(function()
+				{
+					clearInterval(warning_interval);
+					clearInterval(singleTargetInterval);
+					clearInterval(allTargetsInterval);
+					clearInterval(multiTargetInterval);
+					clearInterval(healing_interval);
+					isRunning = false;
+				}, sim_timer * 1000);
 				startAIHealing();
 				initHealingStats();
 				bossPickTarget();
@@ -600,22 +613,7 @@ $(document).ready(function()
 			var cTime = (castTime / 1000) + "s";
 
 
-			var currentHealth = player.health;
-			var maxHealth = player.healthMax;
-			var overheal = 0;
-			var actualHealAmount = 0;
-			var newHealth = currentHealth + healAmount.heal;
-			if(newHealth > maxHealth)
-			{
-				overheal = newHealth - maxHealth;
-				actualHealAmount = healAmount.heal - overheal;
-				newHealth = maxHealth;
-			}
-			else
-			{
-				actualHealAmount = healAmount.heal;
-				newHealth = currentHealth + healAmount.heal;
-			}
+			var tempMaxHealth = player.healthMax;
 
 			pnl = pnl.find('.incoming_container');
 			var currentInc = 0;
@@ -627,7 +625,7 @@ $(document).ready(function()
 			pnl.append(incDiv);
 			var inc = pnl.find('.'+incDivClass);
 			incDivToRemove = inc;
-			var incPerc = (((healAmount.heal / maxHealth) * 100) + "px");
+			var incPerc = (((healAmount.heal / tempMaxHealth) * 50) + "%");
 			inc.css('width', incPerc);
 
 
@@ -661,25 +659,42 @@ $(document).ready(function()
 					$('.cast_bar_progress').css({width: 0});
 					if(player.status === "alive")
 					{
+						var currentHealth = player.health;
+						var maxHealth = player.healthMax;
+						var overheal = 0;
+						var actualHealAmount = 0;
+						var newHealth = currentHealth + healAmount.heal;
+						if(newHealth > maxHealth)
+						{
+							overheal = newHealth - maxHealth;
+							actualHealAmount = healAmount.heal - overheal;
+							newHealth = maxHealth;
+						}
+						else
+						{
+							actualHealAmount = healAmount.heal;
+							newHealth = currentHealth + healAmount.heal;
+						}
+
 						playerHealingDone = playerHealingDone + actualHealAmount;
 						players[29].healingDone = playerHealingDone;
 						player.health = newHealth;
+						updatePanels(player);
 						var isCrit = healAmount.crit;
 						var outputLine = "";
 						if(!isCrit)
 						{
-							outputLine = player.name + " got healed for " + actualHealAmount;
+							outputLine = player.name + " got healed for " + actualHealAmount + " by Player";
 						}
 						else
 						{
-							outputLine = player.name + " got healed for " + actualHealAmount + " (Crit!)";
+							outputLine = player.name + " got healed for " + actualHealAmount + " (Crit!) by Player";
 						}
-						updatePanels(player);
 						$('.cast_bar_text').text("");
 						$('.cast_bar').css({background: 'transparent'});
 						if(overheal > 0)
 						{
-							output.prepend(outputLine + " (" + overheal + " overhealed)" + "\n");
+							output.prepend(outputLine + " (" + overheal + " overhealed)" + "\n  by Player");
 						}
 						else
 						{
@@ -741,9 +756,9 @@ $(document).ready(function()
 		var hClass = i.class;
 		var reaction = i.reaction;
 
-		var healing_interval = setInterval(function()
+		healing_interval = setInterval(function()
 		{
-			if(i.isHealing === false && i.status === "alive")
+			if(i.isHealing === false && i.status === "alive" && isRunning)
 			{
 				if(i.name === "Parsegod")
 				{
@@ -859,11 +874,7 @@ $(document).ready(function()
 	function initAIHeal(pnl, targetID, castTime, healAmount, i)
 	{
 		var player = players[targetID];
-		var currentHealth = player.health;
-		var maxHealth = player.healthMax;
-		var overheal = 0;
-		var actualHealAmount = 0;
-		var newHealth = currentHealth + healAmount;
+		var tempMaxHealth = player.healthMax;
 
 		pnl = pnl.find('.incoming_container');
 		var currentInc = 0;
@@ -876,12 +887,17 @@ $(document).ready(function()
 		pnl.append(incDiv);
 		var inc = pnl.find('.'+incDivClass);
 		incDivToRemove = inc;
-		var incPerc = (((healAmount / maxHealth) * 100) + "px");
+		var incPerc = (((healAmount / tempMaxHealth) * 50) + "%");
 		inc.css('width', incPerc);
 
 
 		setTimeout(function()
 		{
+			var currentHealth = player.health;
+			var maxHealth = player.healthMax;
+			var overheal = 0;
+			var actualHealAmount = 0;
+			var newHealth = currentHealth + healAmount;
 			if(player.status === "alive")
 			{
 				if(newHealth > maxHealth)
@@ -898,20 +914,20 @@ $(document).ready(function()
 				var healingSoFar = i.healingDone;
 				i.healingDone = healingSoFar + actualHealAmount;
 				player.health = newHealth;
+				updatePanels(player);
 				var isCrit = healAmount.crit;
 				var outputLine = "";
 				if(!isCrit)
 				{
-					outputLine = player.name + " got healed for " + actualHealAmount;
+					outputLine = player.name + " got healed for " + actualHealAmount + " by " + i.name;
 				}
 				else
 				{
-					outputLine = player.name + " got healed for " + actualHealAmount + " (Crit!)";
+					outputLine = player.name + " got healed for " + actualHealAmount + " (Crit!) by " + i.name;
 				}
-				updatePanels(player);
 				if(overheal > 0)
 				{
-					output.prepend(outputLine + " (" + overheal + " overhealed)" + "\n");
+					output.prepend(outputLine + " (" + overheal + " overhealed)" + "\n by" + i.name);
 				}
 				else
 				{
@@ -923,6 +939,7 @@ $(document).ready(function()
 			else
 			{
 				incDivToRemove.remove();
+				i.isHealing = false;
 			}
 		}, castTime);	
 	}
