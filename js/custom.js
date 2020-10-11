@@ -58,26 +58,27 @@ $(document).ready(function()
 		{id: '17', name: 'Lostminion', class:'mage', role: 'ranged', status:'alive', health: 4000, healthMax: 4000},
 		{id: '18', name: 'Startaste', class:'warlock', role: 'ranged', status:'alive', health: 4000, healthMax: 4000},
 		{id: '19', name: 'Vengeance', class:'mage', role: 'ranged', status:'alive', health: 4000, healthMax: 4000},
-		{id: '20', name: 'Facepriest', class:'priest', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 100, isHealing: false, healingDone: 0},
+		// {id: '20', name: 'Facepriest', class:'priest', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 100, isHealing: false, healingDone: 0},
+		{id: '20', name: 'Parsegod', class:'priest', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 20, isHealing: false, healingDone: 0, healingPower: 1200},
 		{id: '21', name: 'Paris', class:'rogue', role: 'melee', status:'alive', health: 4500, healthMax: 4500},
 		{id: '22', name: 'Evilguru', class:'mage', role: 'ranged', status:'alive', health: 4000, healthMax: 4000},
 		{id: '23', name: 'Caveruler', class:'druid', role: 'melee', status:'alive', health: 4500, healthMax: 4500},
 		{id: '24', name: 'Oddwarf', class:'hunter', role: 'ranged', status:'alive', health: 4000, healthMax: 4000},
 		{id: '25', name: 'Hiddenstar', class:'warrior', role: 'melee', status:'alive', health: 4500, healthMax: 4500},
-		{id: '26', name: 'Madpro', class:'paladin', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 450, isHealing: false, healingDone: 0},
+		{id: '26', name: 'Madpro', class:'paladin', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 450, isHealing: false, healingDone: 0, healingPower: 900},
 		{id: '27', name: 'Magicpet', class:'warrior', role: 'melee', status:'alive', health: 4500, healthMax: 4500},
-		{id: '28', name: 'Flywaker', class:'priest', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 1500, isHealing: false, healingDone: 0},
-		{id: '29', name: 'Player', class:'druid', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 600, isHealing: false, healingDone: 0},
+		{id: '28', name: 'Flywaker', class:'priest', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 1500, isHealing: false, healingDone: 0, healingPower: 910},
+		{id: '29', name: 'Player', class:'druid', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 600, isHealing: false, healingDone: 0, healingPower: 1000},
 		{id: '30', name: 'Paris', class:'warlock', role: 'ranged', status:'alive', health: 4000, healthMax: 4000},
 		{id: '31', name: 'Icecaller', class:'mage', role: 'ranged', status:'alive', health: 4000, healthMax: 4000},
-		{id: '32', name: 'Stormcake', class:'priest', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 500, isHealing: false, healingDone: 0},
+		{id: '32', name: 'Stormcake', class:'priest', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 500, isHealing: false, healingDone: 0, healingPower: 850},
 		{id: '33', name: 'Pestbender', class:'warrior', role: 'melee', status:'alive', health: 4500, healthMax: 4500},
-		{id: '34', name: 'Fancyboi', class:'paladin', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 500, isHealing: false, healingDone: 0},
+		{id: '34', name: 'Fancyboi', class:'paladin', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 500, isHealing: false, healingDone: 0, healingPower: 700},
 		{id: '35', name: 'Legion', class:'warrior', role: 'melee', status:'alive', health: 4500, healthMax: 4500},
 		{id: '36', name: 'Orcmelter', class:'warrior', role: 'melee', status:'alive', health: 4500, healthMax: 4500},
 		{id: '37', name: 'Coolblade', class:'warrior', role: 'melee', status:'alive', health: 4500, healthMax: 4500},
-		{id: '38', name: 'Icepanda', class:'paladin', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 150, isHealing: false, healingDone: 0},
-		{id: '39', name: 'Firepro', class:'priest', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 1000, isHealing: false, healingDone: 0}
+		{id: '38', name: 'Icepanda', class:'paladin', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 150, isHealing: false, healingDone: 0, healingPower: 1100},
+		{id: '39', name: 'Firepro', class:'priest', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 1000, isHealing: false, healingDone: 0, healingPower: 1100}
 	];
 	var healers;
 	var boss = 
@@ -154,7 +155,6 @@ $(document).ready(function()
 					{
 						castTime = lmb_spell.castTime;
 						healAmount = getHealAmount(lmb_spell);
-						console.log(healAmount);
 						initHeal(pnl, i, castTime, healAmount);
 					}
 					break;
@@ -169,7 +169,6 @@ $(document).ready(function()
 					{
 						castTime = rmb_spell.castTime;
 						healAmount = getHealAmount(rmb_spell);
-						console.log(healAmount);
 						initHeal(pnl, i, castTime, healAmount);
 					}
 					break;
@@ -349,9 +348,9 @@ $(document).ready(function()
 				{
 					var hp = target.health - val.dmg;
 					target.health = hp;
-					console.log("Target: " + target.name)
-					console.log("Target health: "+hp);
-					console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
+					// console.log("Target: " + target.name)
+					// console.log("Target health: "+hp);
+					// console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
 					output.prepend(target.name + " takes "+ val.dmg + "damage from " + val.name + "!" + "\n");
 
 					if(target.health > 0)
@@ -362,7 +361,7 @@ $(document).ready(function()
 					{
 						target.status = "dead";
 						target.health = 0;
-						console.log("Target is Dead!");
+						// console.log("Target is Dead!");
 						updatePanels(target);
 						target = "";
 						bossPickTarget();
@@ -387,9 +386,9 @@ $(document).ready(function()
 						{
 							var hp = player.health - val.dmg;
 							player.health = hp;
-							console.log("Target: " + player.name)
-							console.log("Target health: "+hp);
-							console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
+							// console.log("Target: " + player.name)
+							// console.log("Target health: "+hp);
+							// console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
 							output.prepend(player.name + " takes "+ val.dmg + "damage from " + val.name + "!" + "\n");
 							if(player.health > 0)
 							{
@@ -399,7 +398,7 @@ $(document).ready(function()
 							{
 								player.status = "dead";
 								player.health = 0;
-								console.log("Target is Dead!");
+								// console.log("Target is Dead!");
 								updatePanels(player);
 							}
 							updatePanels(player);
@@ -432,13 +431,12 @@ $(document).ready(function()
 					var selected = getTargets(targetCount)
 					$.each(selected, function(a, b)
 					{
-						console.log(b);
 						var plr = b;
 						var hp = plr.health - val.dmg;
 						plr.health = hp;
-						console.log("Target: " + plr.name)
-						console.log("Target health: "+hp);
-						console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
+						// console.log("Target: " + plr.name)
+						// console.log("Target health: "+hp);
+						// console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
 						output.prepend(plr.name + " takes "+ val.dmg + "damage from " + val.name + "!" + "\n");
 
 						if(plr.health > 0)
@@ -449,7 +447,7 @@ $(document).ready(function()
 						{
 							plr.status = "dead";
 							plr.health = 0;
-							console.log("Target is Dead!");
+							// console.log("Target is Dead!");
 							updatePanels(plr);
 							plr = "";
 							bossPickTarget();
@@ -471,12 +469,11 @@ $(document).ready(function()
 
 	function processDmg(p, val)
 	{
-		console.log(p.name);
 		var hp = p.health - val.dmg;
 		p.health = hp;
-		console.log("Target: " + p.name)
-		console.log("Target health: "+hp);
-		console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
+		// console.log("Target: " + p.name)
+		// console.log("Target health: "+hp);
+		// console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
 		output.prepend(p.name + " takes "+ val.dmg + "damage from " + val.name + "!" + "\n");
 		updatePanels(p);
 	}
@@ -506,12 +503,9 @@ $(document).ready(function()
 				isAliveId.push(val.id);
 			}
 		});
-
-		console.log(isAliveId);
 		
 		var arr = [];
 		var a = isAlive.length;
-		console.log(a);
 		while(arr.length < isAlive.length)
 		{
 		    var r = Math.floor(Math.random() * a - 1) + 1;
@@ -522,7 +516,6 @@ $(document).ready(function()
 		for(var yyy = 0; yyy < t; yyy++)
 		{
 			var yNum = arr[yyy];
-			console.log(yNum);
 			returnArr.push(isAlive[yNum]);
 		}
 
@@ -752,17 +745,29 @@ $(document).ready(function()
 		{
 			if(i.isHealing === false && i.status === "alive")
 			{
-				var healTarget = getHealTarget();
+				if(i.name === "Parsegod")
+				{
+					var healTarget = getHealTargetAILevel10();
+				}
+				else
+				{
+					var healTarget = getHealTarget();
+				}
 
 				if(healTarget !== "")
 				{
 					var pnl = panels.get(healTarget.id);
 					var targetID = healTarget.id;
-					var spell = aiPickSpell(targetID);
+					if(i.name === "Parsegod")
+					{
+						var spell = aiPickSpellLevel10(targetID);
+					}
+					else
+					{
+						var spell = aiPickSpell(targetID);
+					}
 					var s = spells.find(x => x.name === spell);
-					// var healAmount = 850;
 					var healAmount = getHealAmount(s).heal;
-					console.log("--------------"+healAmount);
 					var castTime = s.castTime;
 					i.isHealing = true;
 					initAIHeal($(pnl), targetID, castTime, healAmount, i);
@@ -791,18 +796,62 @@ $(document).ready(function()
 		return healingTarget;
 	}
 
+	function getHealTargetAILevel10()
+	{
+		var healingTargets = [];
+		$.each(players, function(e, i)
+		{
+			if(i.status === 'alive' && i.health < i.healthMax)
+			{
+				var missingHP = i.healthMax - i.health;
+				var asd = {missingHP: missingHP};
+				$.extend(i, asd);
+				healingTargets.push(i);
+			}
+		});
+		var healingTarget = "";
+
+		if(healingTargets.length > 0)
+		{
+			healingTargets = healingTargets.sort(function (a, b)
+			{
+			    return b.missingHP - a.missingHP;
+			});
+			healingTarget = healingTargets[0];
+		}
+		return healingTarget;
+	}
+
 	function aiPickSpell(targetID)
+	{
+		// var targetHP = players[targetID].health;
+		// var targetMissingHP = players[targetID].healthMax - targetHP;
+		// var spell = "";
+		// if(targetMissingHP > 1000)
+		// {
+		// 	spell = "Holy Light (Rank 6)";
+		// }
+		// else
+		// {
+		// 	spell = "Flash of Light (Rank 4)";
+		// }
+		// return spell;
+
+		return "Flash of Light (Rank 5)";
+	}
+
+	function aiPickSpellLevel10(targetID)
 	{
 		var targetHP = players[targetID].health;
 		var targetMissingHP = players[targetID].healthMax - targetHP;
 		var spell = "";
-		if(targetMissingHP > 1000)
+		if(targetMissingHP > 2000)
 		{
-			spell = "Holy Light (Rank 6)";
+			spell = "Holy Light (Rank 7)";
 		}
 		else
 		{
-			spell = "Flash of Light (Rank 4)";
+			spell = "Flash of Light (Rank 6)";
 		}
 		return spell;
 	}
