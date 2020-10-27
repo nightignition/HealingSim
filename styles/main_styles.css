@@ -493,7 +493,7 @@ section
 	width: 300px;
 	height: 20px;
 	background: transparent;
-	margin-bottom: 50px;
+	margin-bottom: 20px;
 	padding-left: 8px;
 }
 .cast_bar_progress
@@ -644,4 +644,13 @@ section
 {
 	font-size: 36px;
 	color: lightgreen;
+}
+.player_hps
+{
+	width: 100px;
+	height: 30px;
+	text-align: center;
+	line-height: 30px;
+	font-size: 20px;
+	color: green;
 }

@@ -492,6 +492,7 @@ $(document).ready(function()
 			if(!isRunning)
 			{
 				isRunning = true;
+				startMainTimer();
 				var sim_timer = simTimer.val();
 				setTimeout(function()
 				{
@@ -511,6 +512,20 @@ $(document).ready(function()
 				});
 			}	
 		});
+	}
+
+	function startMainTimer()
+	{
+		var secs = 0;
+		setInterval(function()
+		{
+			if(secs > 0 && isRunning)
+			{
+				var hps = Math.floor(playerHealingDone / (secs/10));
+				$('.player_hps').text(hps.toString() + "HPS");
+			}
+			secs++;
+		}, 100);
 	}
 
 	function startWarning(val)
