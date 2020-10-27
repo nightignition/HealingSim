@@ -26,11 +26,16 @@ $(document).ready(function()
 	var healing_frame = $('#healing_frame');
 	var start = $('.start');
 	var healingPower;
+	var buttonActive = false;
 	var crit;
 	var lmb_spell = "";
 	var rmb_spell = "";
+	var shift_lmb_spell = "";
+	var shift_rmb_spell = "";
 	var isRunning = false;
 	var isCasting = false;
+	var isCancelled = false;
+	var castingSpell = "";
 	var singleTargetInterval;
 	var allTargetsInterval;
 	var multiTargetInterval;
@@ -62,7 +67,7 @@ $(document).ready(function()
 		{id: '18', name: 'Startaste', class:'warlock', role: 'ranged', status:'alive', health: 4000, healthMax: 4000},
 		{id: '19', name: 'Vengeance', class:'mage', role: 'ranged', status:'alive', health: 4000, healthMax: 4000},
 		// {id: '20', name: 'Facepriest', class:'priest', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 100, isHealing: false, healingDone: 0},
-		{id: '20', name: 'Parsegod', class:'priest', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 20, isHealing: false, healingDone: 0, healingPower: 1200},
+		{id: '20', name: 'Parsegod', class:'priest', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 20, isHealing: false, healingDone: 0, healingPower: 1300},
 		{id: '21', name: 'Paris', class:'rogue', role: 'melee', status:'alive', health: 4500, healthMax: 4500},
 		{id: '22', name: 'Evilguru', class:'mage', role: 'ranged', status:'alive', health: 4000, healthMax: 4000},
 		{id: '23', name: 'Caveruler', class:'druid', role: 'melee', status:'alive', health: 4500, healthMax: 4500},
@@ -96,27 +101,196 @@ $(document).ready(function()
 	];
 	var spells = 
 	[
-		{class: 'paladin', name: 'Flash of Light (Rank 1)', castTime: 1500, min: 67, max: 77},
-		{class: 'paladin', name: 'Flash of Light (Rank 2)', castTime: 1500, min: 102, max: 117},
-		{class: 'paladin', name: 'Flash of Light (Rank 3)', castTime: 1500, min: 153, max: 171},
-		{class: 'paladin', name: 'Flash of Light (Rank 4)', castTime: 1500, min: 206, max: 231},
-		{class: 'paladin', name: 'Flash of Light (Rank 5)', castTime: 1500, min: 278, max: 310},
-		{class: 'paladin', name: 'Flash of Light (Rank 6)', castTime: 1500, min: 348, max: 389},
-		{class: 'paladin', name: 'Holy Light (Rank 1)', castTime: 2500, min: 42, max: 51},
-		{class: 'paladin', name: 'Holy Light (Rank 2)', castTime: 2500, min: 81, max: 96},
-		{class: 'paladin', name: 'Holy Light (Rank 3)', castTime: 2500, min: 167, max: 196},
-		{class: 'paladin', name: 'Holy Light (Rank 4)', castTime: 2500, min: 322, max: 368},
-		{class: 'paladin', name: 'Holy Light (Rank 5)', castTime: 2500, min: 506, max: 569},
-		{class: 'paladin', name: 'Holy Light (Rank 6)', castTime: 2500, min: 717, max: 799},
-		{class: 'paladin', name: 'Holy Light (Rank 7)', castTime: 2500, min: 968, max: 1076},
-		{class: 'paladin', name: 'Holy Light (Rank 8)', castTime: 2500, min: 1272, max: 1414},
+		{class: 'paladin', name: 'Flash of Light (Rank 1)', castTime: 1500, min: 67, max: 77, mana: 35},
+		{class: 'paladin', name: 'Flash of Light (Rank 2)', castTime: 1500, min: 102, max: 117, mana: 50},
+		{class: 'paladin', name: 'Flash of Light (Rank 3)', castTime: 1500, min: 153, max: 171, mana: 70},
+		{class: 'paladin', name: 'Flash of Light (Rank 4)', castTime: 1500, min: 206, max: 231, mana: 90},
+		{class: 'paladin', name: 'Flash of Light (Rank 5)', castTime: 1500, min: 278, max: 310, mana: 115},
+		{class: 'paladin', name: 'Flash of Light (Rank 6)', castTime: 1500, min: 348, max: 389, mana: 140},
+		{class: 'paladin', name: 'Holy Light (Rank 1)', castTime: 2500, min: 42, max: 51, mana: 35},
+		{class: 'paladin', name: 'Holy Light (Rank 2)', castTime: 2500, min: 81, max: 96, mana: 60},
+		{class: 'paladin', name: 'Holy Light (Rank 3)', castTime: 2500, min: 167, max: 196, mana: 110},
+		{class: 'paladin', name: 'Holy Light (Rank 4)', castTime: 2500, min: 322, max: 368, mana: 190},
+		{class: 'paladin', name: 'Holy Light (Rank 5)', castTime: 2500, min: 506, max: 569, mana: 275},
+		{class: 'paladin', name: 'Holy Light (Rank 6)', castTime: 2500, min: 717, max: 799, mana: 365},
+		{class: 'paladin', name: 'Holy Light (Rank 7)', castTime: 2500, min: 968, max: 1076, mana: 465},
+		{class: 'paladin', name: 'Holy Light (Rank 8)', castTime: 2500, min: 1272, max: 1414, mana: 580},
+		{class: 'paladin', name: 'Holy Light (Rank 9)', castTime: 2500, min: 1590, max: 1770, mana: 660},
+		{class: 'priest', name: 'Flash Heal (Rank 1)', castTime: 1500, min: 202, max: 247, mana: 125},
+		{class: 'priest', name: 'Flash Heal (Rank 2)', castTime: 1500, min: 269, max: 325, mana: 155},
+		{class: 'priest', name: 'Flash Heal (Rank 3)', castTime: 1500, min: 339, max: 406, mana: 185},
+		{class: 'priest', name: 'Flash Heal (Rank 4)', castTime: 1500, min: 414, max: 492, mana: 215},
+		{class: 'priest', name: 'Flash Heal (Rank 5)', castTime: 1500, min: 534, max: 633, mana: 265},
+		{class: 'priest', name: 'Flash Heal (Rank 6)', castTime: 1500, min: 662, max: 783, mana: 315},
+		{class: 'priest', name: 'Flash Heal (Rank 7)', castTime: 1500, min: 828, max: 975, mana: 380},
+		{class: 'priest', name: 'Greater Heal (Rank 1)', castTime: 2500, min: 924, max: 1039, mana: 370},
+		{class: 'priest', name: 'Greater Heal (Rank 2)', castTime: 2500, min: 1178, max: 1318, mana: 455},
+		{class: 'priest', name: 'Greater Heal (Rank 3)', castTime: 2500, min: 1470, max: 1642, mana: 545},
+		{class: 'priest', name: 'Greater Heal (Rank 4)', castTime: 2500, min: 1813, max: 2021, mana: 655},
+		{class: 'priest', name: 'Greater Heal (Rank 5)', castTime: 2500, min: 1966, max: 2194, mana: 710},
+		{class: 'priest', name: 'Renew (Rank 1)', castTime: 0, min: 45, max: 45, duration: 15, mana: 30},
+		{class: 'priest', name: 'Renew (Rank 2)', castTime: 0, min: 100, max: 100, duration: 15, interval: 3, mana: 65},
+		{class: 'priest', name: 'Renew (Rank 3)', castTime: 0, min: 175, max: 175, duration: 15, interval: 3, mana: 105},
+		{class: 'priest', name: 'Renew (Rank 4)', castTime: 0, min: 245, max: 245, duration: 15, interval: 3, mana: 140},
+		{class: 'priest', name: 'Renew (Rank 5)', castTime: 0, min: 315, max: 315, duration: 15, interval: 3, mana: 170},
+		{class: 'priest', name: 'Renew (Rank 6)', castTime: 0, min: 400, max: 400, duration: 15, interval: 3, mana: 205},
+		{class: 'priest', name: 'Renew (Rank 7)', castTime: 0, min: 510, max: 510, duration: 15, interval: 3, mana: 250},
+		{class: 'priest', name: 'Renew (Rank 8)', castTime: 0, min: 650, max: 650, duration: 15, interval: 3, mana: 305},
+		{class: 'priest', name: 'Renew (Rank 9)', castTime: 0, min: 810, max: 810, duration: 15, interval: 3, mana: 365},
+		{class: 'priest', name: 'Renew (Rank 10)', castTime: 0, min: 970, max: 970, duration: 15, interval: 3, mana: 410}
 	];
 	var panels;
 
-	initHealingFrame();
+	initClass();
 	initSpells();
+	initHealingFrame();
 	initFight();
 	initAI();
+	initButton();
+
+	// Cancel Heals
+	$(document).keydown(function(event)
+	{
+		if(event.which === 87)
+		{
+			isCancelled = true;
+		}
+		if(event.which === 65)
+		{
+			isCancelled = true;
+		}
+		if(event.which === 83)
+		{
+			isCancelled = true;
+		}
+		if(event.which === 68)
+		{
+			isCancelled = true;
+		}
+	});
+
+	function initClass()
+	{
+		var classDropdown = $('#healer_class_dropdown');
+		//When class dropdown changes clear spell dropdowns and add seleced class spells
+		classDropdown.change(function(e, a)
+		{
+			var selectedClass = classDropdown.find(':selected').val();
+			clearSpells();
+			var spellCount = 0;
+			$.each(spells, (function(val, text)
+			{
+				var spell = text.class;
+				if(spell === selectedClass)
+				{
+					if(spellCount === 0)
+					{
+						$('#left_mouse_button').append($('<option selected></option>').val(text.name).html(text.name));
+						$('#right_mouse_button').append($('<option selected></option>').val(text.name).html(text.name));
+						$('#shift_left_mouse_button').append($('<option selected></option>').val(text.name).html(text.name));
+						$('#shift_right_mouse_button').append($('<option selected></option>').val(text.name).html(text.name));
+					}
+
+					$('#left_mouse_button').append($('<option></option>').val(text.name).html(text.name));
+					$('#right_mouse_button').append($('<option></option>').val(text.name).html(text.name));
+					$('#shift_left_mouse_button').append($('<option></option>').val(text.name).html(text.name));
+					$('#shift_right_mouse_button').append($('<option></option>').val(text.name).html(text.name));
+
+					spellCount++;
+				}
+			}));
+			initSpells();
+		});
+	}
+
+	function clearSpells()
+	{
+		$('#left_mouse_button').find('option').remove();
+		$('#right_mouse_button').find('option').remove();
+		$('#shift_left_mouse_button').find('option').remove();
+		$('#shift_right_mouse_button').find('option').remove();
+	}
+
+	function initSpells()
+	{
+		var lmb_val = $('#left_mouse_button').val();
+		var rmb_val = $('#right_mouse_button').val();
+		var shift_lmb_val = $('#shift_left_mouse_button').val();
+		var shift_rmb_val = $('#shift_right_mouse_button').val();
+		healingPower = $('.healing_input').val();
+		crit = $('.crit_input').val();
+
+		$.each(spells, function(i, s)
+		{
+			if(s.name === lmb_val)
+			{
+				lmb_spell = s;
+			}
+			if(s.name === rmb_val)
+			{
+				rmb_spell = s;
+			}
+			if(s.name === shift_lmb_val)
+			{
+				shift_lmb_spell = s;
+			}
+			if(s.name === shift_rmb_val)
+			{
+				shift_rmb_spell = s;
+			}
+		});
+
+		console.log("Spells set to: \n");
+		console.log("Left Mouse Button: "+lmb_spell.name);
+		console.log("Right Mouse Button: "+rmb_spell.name);
+		console.log(lmb_spell.castTime);
+
+		var apply = $('.apply_spells');
+		apply.on('click', function()
+		{
+			if(apply.hasClass('active'))
+			{
+				lmb_val = $('#left_mouse_button').val();
+				rmb_val = $('#right_mouse_button').val();
+				shift_lmb_val = $('#shift_left_mouse_button').val();
+				shift_rmb_val = $('#shift_right_mouse_button').val();
+				healingPower = $('.healing_input').val();
+
+				$.each(spells, function(i, s)
+				{
+					if(s.name === lmb_val)
+					{
+						lmb_spell = s;
+					}
+					if(s.name === rmb_val)
+					{
+						rmb_spell = s;
+					}
+					if(s.name === shift_lmb_val)
+					{
+						shift_lmb_spell = s;
+					}
+					if(s.name === shift_rmb_val)
+					{
+						shift_rmb_spell = s;
+					}
+				});
+			}	
+		});
+	}
+
+	function initButton()
+	{
+		$('#healer_class_dropdown, #left_mouse_button').change(function()
+		{
+			$('.apply_spells').addClass('active');
+		});
+
+		$('.apply_spells').on('click', function()
+		{
+			$('.apply_spells').removeClass('active');
+		});
+	}
 
 	/* 
 
@@ -143,11 +317,11 @@ $(document).ready(function()
 		{
 			event.stopPropagation();
 			event.stopImmediatePropagation();
-			// var pnl = event.target;
 			var pnl = $(this);
 			var i = $(this).index();
 			var healAmount;
 			var castTime;
+			var fullSpell;
 
 			switch(event.which)
 			{
@@ -156,9 +330,22 @@ $(document).ready(function()
 
 					if(players[i].status === "alive" && isRunning)
 					{
-						castTime = lmb_spell.castTime;
-						healAmount = getHealAmount(lmb_spell);
-						initHeal(pnl, i, castTime, healAmount);
+						if(event.shiftKey)
+						{
+							fullSpell = shift_lmb_spell;
+							castingSpell = shift_lmb_spell.name;
+							castTime = shift_lmb_spell.castTime;
+							healAmount = getHealAmount(shift_lmb_spell);
+							initHeal(pnl, i, castTime, healAmount, fullSpell);
+						}
+						else
+						{
+							fullSpell = lmb_spell;
+							castingSpell = lmb_spell.name;
+							castTime = lmb_spell.castTime;
+							healAmount = getHealAmount(lmb_spell);
+							initHeal(pnl, i, castTime, healAmount, fullSpell);
+						}	
 					}
 					break;
 				case 2:
@@ -170,9 +357,22 @@ $(document).ready(function()
 
 					if(players[i].status === "alive" && isRunning)
 					{
-						castTime = rmb_spell.castTime;
-						healAmount = getHealAmount(rmb_spell);
-						initHeal(pnl, i, castTime, healAmount);
+						if(event.shiftKey)
+						{
+							fullSpell = shift_rmb_spell;
+							castingSpell = shift_rmb_spell.name;
+							castTime = shift_rmb_spell.castTime;
+							healAmount = getHealAmount(shift_rmb_spell);
+							initHeal(pnl, i, castTime, healAmount, fullSpell);
+						}
+						else
+						{
+							fullSpell = rmb_spell;
+							castingSpell = rmb_spell.name;
+							castTime = rmb_spell.castTime;
+							healAmount = getHealAmount(rmb_spell);
+							initHeal(pnl, i, castTime, healAmount, fullSpell);
+						}	
 					}
 					break;
 			}
@@ -220,6 +420,51 @@ $(document).ready(function()
 			returnHeal = {heal: healAmount, crit: crt};
 		}
 
+		// If spell is Flash Heal
+		if(spell.name.indexOf("Flash Heal") >= 0)
+		{
+			coef = 0.4285;
+			bonusHealing = Math.ceil(healingPower * coef);
+			avg = Math.ceil(Math.random() * (max - min + 1) + min);
+			healAmount = avg + bonusHealing;
+			crt = isCrit();
+			if(crt)
+			{
+				healAmount = healAmount * 1.5;
+			}
+			returnHeal = {heal: healAmount, crit: crt};
+		}
+
+		// If spell is Greater Heal
+		if(spell.name.indexOf("Greater Heal") >= 0)
+		{
+			coef = 0.8571;
+			bonusHealing = Math.ceil(healingPower * coef);
+			avg = Math.ceil(Math.random() * (max - min + 1) + min);
+			healAmount = avg + bonusHealing;
+			crt = isCrit();
+			if(crt)
+			{
+				healAmount = healAmount * 1.5;
+			}
+			returnHeal = {heal: healAmount, crit: crt};
+		}
+
+		// If spell is Renew
+		if(spell.name.indexOf("Renew") >= 0)
+		{
+			coef = 1;
+			bonusHealing = Math.ceil(healingPower * coef);
+			avg = Math.ceil(Math.random() * (max - min + 1) + min);
+			healAmount = avg + bonusHealing;
+			crt = isCrit();
+			if(crt)
+			{
+				healAmount = healAmount * 1.5;
+			}
+			returnHeal = {heal: healAmount, crit: crt};
+		}
+
 		return returnHeal;
 	}
 
@@ -232,51 +477,6 @@ $(document).ready(function()
 			retValue = true;
 		}
 		return retValue;
-	}
-
-	function initSpells()
-	{
-		var lmb_val = $('#left_mouse_button').val();
-		var rmb_val = $('#right_mouse_button').val();
-		healingPower = $('.healing_input').val();
-		crit = $('.crit_input').val();
-
-		$.each(spells, function(i, s)
-		{
-			if(s.name === lmb_val)
-			{
-				lmb_spell = s;
-			}
-			if(s.name === rmb_val)
-			{
-				rmb_spell = s;
-			}
-		});
-
-		console.log("Spells set to: \n");
-		console.log("Left Mouse Button: "+lmb_spell.name);
-		console.log("Right Mouse Button: "+rmb_spell.name);
-		console.log(lmb_spell.castTime);
-
-		var apply = $('.apply_spells');
-		apply.on('click', function()
-		{
-			lmb_val = $('#left_mouse_button').val();
-			rmb_val = $('#right_mouse_button').val();
-			healingPower = $('.healing_input').val();
-
-			$.each(spells, function(i, s)
-			{
-				if(s.name === lmb_val)
-				{
-					lmb_spell = s;
-				}
-				if(s.name === rmb_val)
-				{
-					rmb_spell = s;
-				}
-			});
-		});
 	}
 
 	/* 
@@ -361,9 +561,6 @@ $(document).ready(function()
 				{
 					var hp = target.health - val.dmg;
 					target.health = hp;
-					// console.log("Target: " + target.name)
-					// console.log("Target health: "+hp);
-					// console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
 					output.prepend(target.name + " takes "+ val.dmg + "damage from " + val.name + "!" + "\n");
 
 					if(target.health > 0)
@@ -374,7 +571,6 @@ $(document).ready(function()
 					{
 						target.status = "dead";
 						target.health = 0;
-						// console.log("Target is Dead!");
 						updatePanels(target);
 						target = "";
 						bossPickTarget();
@@ -399,9 +595,6 @@ $(document).ready(function()
 						{
 							var hp = player.health - val.dmg;
 							player.health = hp;
-							// console.log("Target: " + player.name)
-							// console.log("Target health: "+hp);
-							// console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
 							output.prepend(player.name + " takes "+ val.dmg + "damage from " + val.name + "!" + "\n");
 							if(player.health > 0)
 							{
@@ -411,7 +604,6 @@ $(document).ready(function()
 							{
 								player.status = "dead";
 								player.health = 0;
-								// console.log("Target is Dead!");
 								updatePanels(player);
 							}
 							updatePanels(player);
@@ -447,9 +639,6 @@ $(document).ready(function()
 						var plr = b;
 						var hp = plr.health - val.dmg;
 						plr.health = hp;
-						// console.log("Target: " + plr.name)
-						// console.log("Target health: "+hp);
-						// console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
 						output.prepend(plr.name + " takes "+ val.dmg + "damage from " + val.name + "!" + "\n");
 
 						if(plr.health > 0)
@@ -484,9 +673,6 @@ $(document).ready(function()
 	{
 		var hp = p.health - val.dmg;
 		p.health = hp;
-		// console.log("Target: " + p.name)
-		// console.log("Target health: "+hp);
-		// console.log("Target takes "+ val.dmg + "damage from " + val.name + "!");
 		output.prepend(p.name + " takes "+ val.dmg + "damage from " + val.name + "!" + "\n");
 		updatePanels(p);
 	}
@@ -604,63 +790,191 @@ $(document).ready(function()
 		});
 	}
 
-	function initHeal(pnl, i, castTime, healAmount)
+	function initHeal(pnl, i, castTime, healAmount, fullSpell)
 	{
 		if(!isCasting)
 		{
-			var player = players[i];
-			isCasting = true;
-			var cTime = (castTime / 1000) + "s";
-
-
-			var tempMaxHealth = player.healthMax;
-
-			pnl = pnl.find('.incoming_container');
-			var currentInc = 0;
-			var incDivCount = pnl.find('.incoming').length;
-			var incDivClass = "incoming"+incDivCount.toString();
-			var incDivClassFinal = "incoming "+incDivClass;
-			var incDiv = '<div class="' + incDivClassFinal +'"></div>';
-			var incDivToRemove;
-			pnl.append(incDiv);
-			var inc = pnl.find('.'+incDivClass);
-			incDivToRemove = inc;
-			var incPerc = (((healAmount.heal / tempMaxHealth) * 50) + "%");
-			inc.css('width', incPerc);
-
-
-			$('.cast_bar_progress').animate(
+			// If cast time is 0, it's a HoT
+			if(castTime === 0)
 			{
-				width: '100%'
-			},
+				addHot(pnl, i, healAmount, fullSpell);
+			}
+			else
 			{
-				duration: castTime,
-				easing: 'linear',
-				start: function()
+				var player = players[i];
+				isCasting = true;
+				var cTime = (castTime / 1000) + "s";
+				var tempMaxHealth = player.healthMax;
+				pnl = pnl.find('.incoming_container');
+				var currentInc = 0;
+				var incDivCount = pnl.find('.incoming').length;
+				var incDivClass = "incoming"+incDivCount.toString();
+				var incDivClassFinal = "incoming "+incDivClass;
+				var incDiv = '<div class="' + incDivClassFinal +'"></div>';
+				var incDivToRemove;
+				pnl.append(incDiv);
+				var inc = pnl.find('.'+incDivClass);
+				incDivToRemove = inc;
+				var incPerc = (((healAmount.heal / tempMaxHealth) * 50) + "%");
+				inc.css('width', incPerc);
+
+				$('.cast_bar_progress').animate(
 				{
-					$('.cast_bar').css({background: '#000000'});
-					$('.cast_bar_text').text("Casting Flash of Light " + cTime);
+					width: '100%'
 				},
-				step: function()
 				{
-					if(player.status !== "alive")
+					duration: castTime,
+					easing: 'linear',
+					start: function()
 					{
-						$('.cast_bar_progress').css({width: 0});
-						$('.cast_bar_text').text("");
-						$('.cast_bar').css({background: 'transparent'});
+						$('.cast_bar').css({background: '#000000'});
+						$('.cast_bar_text').text("Casting " + castingSpell + " - " + cTime);
+					},
+					step: function()
+					{
+						// if(player.status !== "alive")
+						// {
+						// 	$('.cast_bar_progress').css({width: 0});
+						// 	$('.cast_bar_text').text("");
+						// 	$('.cast_bar').css({background: 'transparent'});
+						// 	isCasting = false;
+						// 	pnl.find('.incoming').remove();
+						// 	$(this).stop(false, false);
+						// }
+					},
+					// Cancel Cast
+					progress: function()
+					{
+						if(isCancelled || player.status !== "alive")
+						{
+							$('.cast_bar_progress').css({width: 0});
+							$('.cast_bar_text').text("");
+							$('.cast_bar').css({background: 'transparent'});
+							isCasting = false;
+							pnl.find('.incoming').remove();
+							$(this).stop(false, false);
+							isCancelled = false;
+						}
+					},
+					complete: function()
+					{
 						isCasting = false;
-						pnl.find('.incoming').remove();
-						$(this).stop(false, false);
+						$('.cast_bar_progress').css({width: 0});
+						if(player.status === "alive")
+						{
+							var currentHealth = player.health;
+							var maxHealth = player.healthMax;
+							var overheal = 0;
+							var actualHealAmount = 0;
+							var newHealth = currentHealth + healAmount.heal;
+							if(newHealth > maxHealth)
+							{
+								overheal = newHealth - maxHealth;
+								actualHealAmount = healAmount.heal - overheal;
+								newHealth = maxHealth;
+							}
+							else
+							{
+								actualHealAmount = Math.ceil(healAmount.heal);
+								newHealth = currentHealth + healAmount.heal;
+							}
+
+							playerHealingDone = playerHealingDone + actualHealAmount;
+							players[29].healingDone = playerHealingDone;
+							player.health = newHealth;
+							updatePanels(player);
+							showMyHeal(actualHealAmount, healAmount.crit);
+							var isCrit = healAmount.crit;
+							var outputLine = "";
+							if(!isCrit)
+							{
+								outputLine = player.name + " got healed for " + actualHealAmount + " by Player";
+							}
+							else
+							{
+								outputLine = player.name + " got healed for " + actualHealAmount + " (Crit!) by Player";
+							}
+							$('.cast_bar_text').text("");
+							$('.cast_bar').css({background: 'transparent'});
+							if(overheal > 0)
+							{
+								output.prepend(outputLine + " (" + overheal + " overhealed)" + "\n  by Player");
+							}
+							else
+							{
+								output.prepend(outputLine + "\n");
+							}
+
+							incDivToRemove.remove();
+						}
+							
 					}
-				},
-				complete: function()
+				})
+				.animate(
+					{
+						width: '0%'
+					},
+					{
+						duration: 0
+					});
+			}	
+		}
+	}
+
+	function addHot(pnl, i, healAmount, fullSpell)
+	{
+		var player = players[i];
+		if(player.status === "alive")
+		{
+			// Create hot icon and add it to the panel if hot does not already exist
+			var hotClass = 'hot';
+			var hotName = fullSpell.name.split(' ')[0].toLowerCase();
+			healAmount.heal = Math.ceil(healAmount.heal / (fullSpell.duration / fullSpell.interval));
+			if($(pnl).find('.' + hotName).length > 0)
+			{
+				isCasting = true;
+				setTimeout(function()
 				{
 					isCasting = false;
-					$('.cast_bar_progress').css({width: 0});
-					if(player.status === "alive")
+				}, 1500);
+			}
+			else
+			{
+				isCasting = true;
+				var hotIcon = '<div class="' + hotClass + ' ' + hotName + '"></div>';
+				$(pnl).append(hotIcon);
+				setTimeout(function()
+				{
+					isCasting = false;
+				}, 1500);
+				setTimeout(function()
+				{
+					pnl.find('.' + hotName).remove();
+				}, fullSpell.duration * 1000);
+
+				var tempMaxHealth = player.healthMax;
+				var currentHealth = player.health;
+				var maxHealth = player.healthMax;
+				var pnl2 = pnl.find('.incoming_container');
+				var incID = getRandomNum();
+				var incDivClass = "incoming" + incID.toString();
+				var incDivClassFinal = "incoming "+incDivClass;
+				var incDiv = '<div class="' + incDivClassFinal +'"></div>';
+				var incDivToRemove;
+				pnl2.append(incDiv);
+				var inc = pnl2.find('.'+incDivClass);
+				incDivToRemove = inc;
+				var incPerc = (((healAmount.heal / tempMaxHealth) * 50) + "%");
+				inc.css('width', incPerc);
+
+				// HoT interval
+				var hotInterval = setInterval(function()
+				{
+					if(player.status === "alive" && isRunning)
 					{
-						var currentHealth = player.health;
-						var maxHealth = player.healthMax;
+						tempMaxHealth = player.healthMax;
+						currentHealth = player.health;
+						maxHealth = player.healthMax;
 						var overheal = 0;
 						var actualHealAmount = 0;
 						var newHealth = currentHealth + healAmount.heal;
@@ -680,6 +994,7 @@ $(document).ready(function()
 						players[29].healingDone = playerHealingDone;
 						player.health = newHealth;
 						updatePanels(player);
+						showMyHeal(actualHealAmount, healAmount.crit);
 						var isCrit = healAmount.crit;
 						var outputLine = "";
 						if(!isCrit)
@@ -690,8 +1005,6 @@ $(document).ready(function()
 						{
 							outputLine = player.name + " got healed for " + actualHealAmount + " (Crit!) by Player";
 						}
-						$('.cast_bar_text').text("");
-						$('.cast_bar').css({background: 'transparent'});
 						if(overheal > 0)
 						{
 							output.prepend(outputLine + " (" + overheal + " overhealed)" + "\n  by Player");
@@ -701,19 +1014,57 @@ $(document).ready(function()
 							output.prepend(outputLine + "\n");
 						}
 
+						// Remove incoming heal
+						setTimeout(function()
+						{
+							incDivToRemove.remove();
+						}, fullSpell.interval * 1000);
+					}
+					else
+					{
 						incDivToRemove.remove();
 					}
+
 						
-				}
-			})
-			.animate(
+				}, fullSpell.interval * 1000);
+
+				// Clear Interval
+				setTimeout(function()
 				{
-					width: '0%'
-				},
-				{
-					duration: 0
-				});
+					clearInterval(hotInterval);
+				}, fullSpell.duration * 1000);
+			}
+		}	
+	}
+
+	function getRandomNum()
+	{
+		var x = Math.floor(1000 + Math.random() * 9000);
+
+		return x;
+	}
+
+	function showMyHeal(heal, crit)
+	{
+		var critClass = "";
+		if(crit)
+		{
+			critClass = "crit";
 		}
+		var newDiv = '<div class="show_my_heal '+ critClass +'">'+ heal +'</div>';
+		
+		$('.show_my_heal_container > div').append(newDiv);
+		var newElement = $('.show_my_heal')[$('.show_my_heal').length - 1];
+		$(newElement).animate(
+		{
+			bottom: '100%',
+			opacity: '0'
+		}, 3000, "linear",
+			function()
+			{
+				$(newElement).remove();
+			}
+		);
 	}
 
 	/* 
@@ -933,14 +1284,13 @@ $(document).ready(function()
 				{
 					output.prepend(outputLine + "\n");
 				}
-				i.isHealing = false;
 				incDivToRemove.remove();
 			}
 			else
 			{
 				incDivToRemove.remove();
-				i.isHealing = false;
 			}
+			i.isHealing = false;
 		}, castTime);	
 	}
 

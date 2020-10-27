@@ -531,6 +531,27 @@ section
 	line-height: 30px;
 	text-align: center;
 }
+.apply_spells.active
+{
+	background: lightgreen;
+}
+.apply_spells.active::after
+{
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: transparent;
+	border: solid 2px green;
+	opacity: 0;
+	content: '';
+}
+.apply_spells.active:hover::after
+{
+	opacity: 1;
+}
 .stats_form input
 {
 	width: 50px;
@@ -587,4 +608,40 @@ section
 	color: #07eb44;
 	font-size: 12px;
 	padding: 15px;
+}
+.hot
+{
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 13px;
+	height: 13px;
+	background: lightgreen;
+	z-index: 100;
+}
+.show_my_heal_container
+{
+	position: absolute;
+	top: 150px;
+	left: calc(50% + 300px);
+	width: 100px;
+	height: 300px;
+}
+.show_my_heal_container > div:first-child
+{
+	width: 100%;
+	height: 100%;
+}
+.show_my_heal
+{
+	position: absolute;
+	left: 0;
+	bottom: 0%;
+	font-size: 24px;
+	color: green;
+}
+.show_my_heal.crit
+{
+	font-size: 36px;
+	color: lightgreen;
 }

@@ -43,8 +43,21 @@
 				<input type="text" class="crit_input" id="crit_input" value="30">
 				<label for="crit_input">Crit</label>
 			</div>
+			<div>
+				<input type="text" class="sim_timer" id="mana" value="7500">
+				<label for="mana">Mana</label>
+			</div>
 		</form>
 		<form action="#" class="spells_form">
+			<div class="healer_class_dropdown">
+				<select name="healer_class_dropdown" id="healer_class_dropdown" class="spell_select">
+					<option value="paladin">Paladin</option>
+					<option value="priest">Priest</option>
+					<!-- <option value="druid">Druid</option>
+					<option value="shaman">Shaman</option> -->
+				</select>
+				<label for="healer_class_dropdown">Class</label>
+			</div>
 			<div class="spell">
 				<select name="left_mouse_button" id="left_mouse_button" class="spell_select">
 					<option value="Flash of Light (Rank 1)">Flash of Light (Rank 1)</option>
@@ -61,6 +74,7 @@
 					<option value="Holy Light (Rank 6)">Holy Light (Rank 6)</option>
 					<option value="Holy Light (Rank 7)">Holy Light (Rank 7)</option>
 					<option value="Holy Light (Rank 8)">Holy Light (Rank 8)</option>
+					<option value="Holy Light (Rank 9)">Holy Light (Rank 8)</option>
 				</select>
 				<label for="left_mouse_button">Left Mouse Button</label>
 			</div>
@@ -79,9 +93,48 @@
 					<option value="Holy Light (Rank 5)">Holy Light (Rank 5)</option>
 					<option value="Holy Light (Rank 6)">Holy Light (Rank 6)</option>
 					<option value="Holy Light (Rank 7)">Holy Light (Rank 7)</option>
-					<option value="Holy Light (Rank 8)" selected>Holy Light (Rank 8)</option>
+					<option value="Holy Light (Rank 8)">Holy Light (Rank 8)</option>
+					<option value="Holy Light (Rank 9)" selected>Holy Light (Rank 8)</option>
 				</select>
 				<label for="right_mouse_button">Right Mouse Button</label>
+			</div>
+			<div class="spell">
+				<select name="shift_left_mouse_button" id="shift_left_mouse_button" class="spell_select">
+					<option value="Flash of Light (Rank 1)" selected>Flash of Light (Rank 1)</option>
+					<option value="Flash of Light (Rank 2)">Flash of Light (Rank 2)</option>
+					<option value="Flash of Light (Rank 3)">Flash of Light (Rank 3)</option>
+					<option value="Flash of Light (Rank 4)">Flash of Light (Rank 4)</option>
+					<option value="Flash of Light (Rank 5)">Flash of Light (Rank 5)</option>
+					<option value="Flash of Light (Rank 6)">Flash of Light (Rank 6)</option>
+					<option value="Holy Light (Rank 1)">Holy Light (Rank 1)</option>
+					<option value="Holy Light (Rank 2)">Holy Light (Rank 2)</option>
+					<option value="Holy Light (Rank 3)">Holy Light (Rank 3)</option>
+					<option value="Holy Light (Rank 4)">Holy Light (Rank 4)</option>
+					<option value="Holy Light (Rank 5)">Holy Light (Rank 5)</option>
+					<option value="Holy Light (Rank 6)">Holy Light (Rank 6)</option>
+					<option value="Holy Light (Rank 7)">Holy Light (Rank 7)</option>
+					<option value="Holy Light (Rank 8)">Holy Light (Rank 8)</option>
+				</select>
+				<label for="shift_left_mouse_button">SHIFT + Left Mouse Button</label>
+			</div>
+			<div class="spell">
+				<select name="shift_right_mouse_button" id="shift_right_mouse_button" class="spell_select">
+					<option value="Flash of Light (Rank 1)">Flash of Light (Rank 1)</option>
+					<option value="Flash of Light (Rank 2)">Flash of Light (Rank 2)</option>
+					<option value="Flash of Light (Rank 3)">Flash of Light (Rank 3)</option>
+					<option value="Flash of Light (Rank 4)">Flash of Light (Rank 4)</option>
+					<option value="Flash of Light (Rank 5)">Flash of Light (Rank 5)</option>
+					<option value="Flash of Light (Rank 6)">Flash of Light (Rank 6)</option>
+					<option value="Holy Light (Rank 1)" selected>Holy Light (Rank 1)</option>
+					<option value="Holy Light (Rank 2)">Holy Light (Rank 2)</option>
+					<option value="Holy Light (Rank 3)">Holy Light (Rank 3)</option>
+					<option value="Holy Light (Rank 4)">Holy Light (Rank 4)</option>
+					<option value="Holy Light (Rank 5)">Holy Light (Rank 5)</option>
+					<option value="Holy Light (Rank 6)">Holy Light (Rank 6)</option>
+					<option value="Holy Light (Rank 7)">Holy Light (Rank 7)</option>
+					<option value="Holy Light (Rank 8)">Holy Light (Rank 8)</option>
+				</select>
+				<label for="shift_right_mouse_button">SHIFT + Right Mouse Button</label>
 			</div>
 			<div class="spell_button_container">
 				<div class="apply_spells">Apply</div>
@@ -94,6 +147,7 @@
 	<div class="healing_stats">
 		<textarea id="healing_stats" disabled=""></textarea>
 	</div>
+	<div class="show_my_heal_container"><div></div></div>
 </div>
 
 <script src="js/jquery-3.3.1.min.js"></script>
