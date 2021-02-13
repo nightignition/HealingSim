@@ -20,6 +20,7 @@ $(document).ready(function()
 	*/
 
 	var output = $('#output');
+	var playerClass = "Paladin";
 	var healingStatsOutput = $('#healing_stats');
 	var simTimer = $('#sim_timer');
 	var raid_size = 40;
@@ -28,6 +29,12 @@ $(document).ready(function()
 	var healingPower;
 	var buttonActive = false;
 	var crit;
+	var maxMana;
+	var mana;
+	var mp5;
+	var mp5Timer = 0;
+	var manaPot = $('.manaPot');
+	var rune = $('.rune');
 	var lmb_spell = "";
 	var rmb_spell = "";
 	var mmb_spell = ""
@@ -51,6 +58,8 @@ $(document).ready(function()
 	var multiTargetInterval;
 	var healing_interval;
 	var warning_interval;
+	var mp5_interval;
+	var mp5_global;
 	var target = "";
 	var playerHealingDone = 0;
 	var fightTimer = 120;
@@ -80,15 +89,15 @@ $(document).ready(function()
 		// {id: '20', name: 'Facepriest', class:'priest', role: 'healer', status:'alive', health: 4000, healthMax: 4000, reaction: 100, isHealing: false, healingDone: 0},
 		{id: '20', name: 'Parsegod', class:'priest', role: 'healer', status:'alive', health: 6000, healthMax: 6000, reaction: 20, isHealing: false, healingDone: 0, healingPower: 1300, avoidance: 5, focus: 'raid'},
 		// {id: '21', name: 'Paris', class:'rogue', role: 'melee', status:'alive', health: 4500, healthMax: 4500, avoidance: 5},
-		{id: '21', name: 'Paris', class:'priest', role: 'healer', status:'alive', health: 6000, healthMax: 6000, reaction: 200, isHealing: false, healingDone: 0, healingPower: 950, avoidance: 5, focus: 'raid'},
+		{id: '21', name: 'Paris', class:'priest', role: 'healer', status:'alive', health: 6000, healthMax: 6000, reaction: 500, isHealing: false, healingDone: 0, healingPower: 950, avoidance: 5, focus: 'raid'},
 		{id: '22', name: 'Evilguru', class:'mage', role: 'ranged', status:'alive', health: 6000, healthMax: 6000, avoidance: 5},
 		{id: '23', name: 'Caveruler', class:'druid', role: 'melee', status:'alive', health: 6000, healthMax: 6000, avoidance: 5},
 		{id: '24', name: 'Oddwarf', class:'hunter', role: 'ranged', status:'alive', health: 6000, healthMax: 6000, avoidance: 5},
 		// {id: '25', name: 'Hiddenstar', class:'warrior', role: 'melee', status:'alive', health: 4500, healthMax: 4500, avoidance: 5},
-		{id: '25', name: 'Hiddenstar', class:'paladin', role: 'healer', status:'alive', health: 6500, healthMax: 6500, reaction: 120, isHealing: false, healingDone: 0, healingPower: 1100, avoidance: 5, focus: 'mt'},
+		{id: '25', name: 'Hiddenstar', class:'paladin', role: 'healer', status:'alive', health: 6500, healthMax: 6500, reaction: 200, isHealing: false, healingDone: 0, healingPower: 1100, avoidance: 5, focus: 'mt'},
 		{id: '26', name: 'Madpro', class:'paladin', role: 'healer', status:'alive', health: 6500, healthMax: 6500, reaction: 450, isHealing: false, healingDone: 0, healingPower: 900, avoidance: 5, focus: 'raid'},
 		{id: '27', name: 'Magicpet', class:'paladin', role: 'healer', status:'alive', health: 6500, healthMax: 6500, reaction: 450, isHealing: false, healingDone: 0, healingPower: 900, avoidance: 5, focus: 'mt'},
-		{id: '28', name: 'Flywaker', class:'priest', role: 'healer', status:'alive', health: 6500, healthMax: 6500, reaction: 1500, isHealing: false, healingDone: 0, healingPower: 910, avoidance: 5, focus: 'raid'},
+		{id: '28', name: 'Flywaker', class:'priest', role: 'healer', status:'alive', health: 6500, healthMax: 6500, reaction: 1000, isHealing: false, healingDone: 0, healingPower: 910, avoidance: 5, focus: 'raid'},
 		{id: '29', name: 'Player', class:'druid', role: 'healer', status:'alive', health: 6500, healthMax: 6500, reaction: 600, isHealing: false, healingDone: 0, healingPower: 1000, avoidance: 5, focus: 'raid'},
 		{id: '30', name: 'Paris', class:'warlock', role: 'ranged', status:'alive', health: 6500, healthMax: 6500, avoidance: 5},
 		{id: '31', name: 'Icecaller', class:'mage', role: 'ranged', status:'alive', health: 6000, healthMax: 6000, avoidance: 5},
@@ -98,8 +107,8 @@ $(document).ready(function()
 		{id: '35', name: 'Legion', class:'warrior', role: 'melee', status:'alive', health: 6000, healthMax: 6000, avoidance: 5},
 		{id: '36', name: 'Orcmelter', class:'warrior', role: 'melee', status:'alive', health: 6000, healthMax: 6000, avoidance: 5},
 		// {id: '37', name: 'Coolblade', class:'warrior', role: 'melee', status:'alive', health: 4500, healthMax: 4500, avoidance: 5},
-		{id: '37', name: 'Coolblade', class:'paladin', role: 'healer', status:'alive', health: 6000, healthMax: 6000, reaction: 170, isHealing: false, healingDone: 0, healingPower: 930, avoidance: 5, focus: 'raid'},
-		{id: '38', name: 'Icepanda', class:'paladin', role: 'healer', status:'alive', health: 6000, healthMax: 6000, reaction: 150, isHealing: false, healingDone: 0, healingPower: 1100, avoidance: 5, focus: 'mt'},
+		{id: '37', name: 'Coolblade', class:'paladin', role: 'healer', status:'alive', health: 6000, healthMax: 6000, reaction: 370, isHealing: false, healingDone: 0, healingPower: 930, avoidance: 5, focus: 'raid'},
+		{id: '38', name: 'Icepanda', class:'paladin', role: 'healer', status:'alive', health: 6000, healthMax: 6000, reaction: 350, isHealing: false, healingDone: 0, healingPower: 1100, avoidance: 5, focus: 'raid'},
 		{id: '39', name: 'Firepro', class:'priest', role: 'healer', status:'alive', health: 6000, healthMax: 6000, reaction: 1000, isHealing: false, healingDone: 0, healingPower: 1100, avoidance: 5, focus: 'raid'}
 	];
 	var healers;
@@ -109,9 +118,9 @@ $(document).ready(function()
 	};
 	var boss_abilities = 
 	[
-		{bossname: 'type1', name: 'melee', start: 1, time: 1.5, delay: 0, dmg: 1200, crit: 12, targets: 1, targetRole: "mt", warning: false},
-		{bossname: 'type1', name: 'cleave', start: 1, time: 1.5, delay: 0, dmg: 1200, crit: 20, targets: 2, targetRole: "melee", warning: false},
-		{bossname: 'type1', name: 'Impending Doom', start: 10, time: 20, delay: 10, dmg: 1000, crit: 0, targets: "all",miss: 0,  targetRole: "", warning: true},
+		{bossname: 'type1', name: 'melee', start: 1, time: 1.5, delay: 0, dmg: 2200, crit: 12, targets: 1, targetRole: "mt", warning: false},
+		{bossname: 'type1', name: 'cleave', start: 1, time: 1.5, delay: 0, dmg: 1200, crit: 20, targets: 4, targetRole: "melee", warning: false},
+		{bossname: 'type1', name: 'Impending Doom', start: 10, time: 20, delay: 10, dmg: 2000, crit: 0, targets: "all",miss: 0,  targetRole: "", warning: true},
 		{bossname: 'type2', name: 'melee', start: 1, time: 1.5, delay: 0, dmg: 1500, crit: 5, targets: 1, targetRole: "mt", warning: false},
 		{bossname: 'type2', name: 'Frost Aura', start: 1, time: 2, delay: 0, dmg: 250, crit: 0, targets: "all", targetRole: "", warning: false},
 		{bossname: 'type2', name: 'Icebolt1', start: 5, time: 60, delay: 3, dmg: 2500, crit: 0, targets: 1, targetRole: "", warning: true},
@@ -144,11 +153,11 @@ $(document).ready(function()
 		{class: 'priest', name: 'Flash Heal (Rank 5)', castTime: 1500, min: 534, max: 633, mana: 265},
 		{class: 'priest', name: 'Flash Heal (Rank 6)', castTime: 1500, min: 662, max: 783, mana: 315},
 		{class: 'priest', name: 'Flash Heal (Rank 7)', castTime: 1500, min: 828, max: 975, mana: 380},
-		{class: 'priest', name: 'Greater Heal (Rank 1)', castTime: 2500, min: 924, max: 1039, mana: 370},
-		{class: 'priest', name: 'Greater Heal (Rank 2)', castTime: 2500, min: 1178, max: 1318, mana: 455},
-		{class: 'priest', name: 'Greater Heal (Rank 3)', castTime: 2500, min: 1470, max: 1642, mana: 545},
-		{class: 'priest', name: 'Greater Heal (Rank 4)', castTime: 2500, min: 1813, max: 2021, mana: 655},
-		{class: 'priest', name: 'Greater Heal (Rank 5)', castTime: 2500, min: 1966, max: 2194, mana: 710},
+		{class: 'priest', name: 'Greater Heal (Rank 1)', castTime: 2500, min: 924, max: 1039, mana: 314},
+		{class: 'priest', name: 'Greater Heal (Rank 2)', castTime: 2500, min: 1178, max: 1318, mana: 387},
+		{class: 'priest', name: 'Greater Heal (Rank 3)', castTime: 2500, min: 1470, max: 1642, mana: 463},
+		{class: 'priest', name: 'Greater Heal (Rank 4)', castTime: 2500, min: 1813, max: 2021, mana: 557},
+		{class: 'priest', name: 'Greater Heal (Rank 5)', castTime: 2500, min: 1966, max: 2194, mana: 604},
 		{class: 'priest', name: 'Renew (Rank 1)', castTime: 0, min: 45, max: 45, duration: 15, mana: 30},
 		{class: 'priest', name: 'Renew (Rank 2)', castTime: 0, min: 100, max: 100, duration: 15, interval: 3, mana: 65},
 		{class: 'priest', name: 'Renew (Rank 3)', castTime: 0, min: 175, max: 175, duration: 15, interval: 3, mana: 105},
@@ -159,10 +168,10 @@ $(document).ready(function()
 		{class: 'priest', name: 'Renew (Rank 8)', castTime: 0, min: 650, max: 650, duration: 15, interval: 3, mana: 305},
 		{class: 'priest', name: 'Renew (Rank 9)', castTime: 0, min: 810, max: 810, duration: 15, interval: 3, mana: 365},
 		{class: 'priest', name: 'Renew (Rank 10)', castTime: 0, min: 970, max: 970, duration: 15, interval: 3, mana: 410},
-		{class: 'priest', name: 'Prayer of Healing (Rank 1)', castTime: 3000, min: 312, max: 333, mana: 410},
-		{class: 'priest', name: 'Prayer of Healing (Rank 2)', castTime: 3000, min: 458, max: 487, mana: 560},
-		{class: 'priest', name: 'Prayer of Healing (Rank 3)', castTime: 3000, min: 675, max: 713, mana: 770},
-		{class: 'priest', name: 'Prayer of Healing (Rank 4)', castTime: 3000, min: 939, max: 991, mana: 1030},
+		{class: 'priest', name: 'Prayer of Healing (Rank 1)', castTime: 3000, min: 312, max: 333, mana: 328},
+		{class: 'priest', name: 'Prayer of Healing (Rank 2)', castTime: 3000, min: 458, max: 487, mana: 448},
+		{class: 'priest', name: 'Prayer of Healing (Rank 3)', castTime: 3000, min: 675, max: 713, mana: 616},
+		{class: 'priest', name: 'Prayer of Healing (Rank 4)', castTime: 3000, min: 939, max: 991, mana: 824},
 		{class: 'priest', name: 'Prayer of Healing (Rank 5)', castTime: 3000, min: 1041, max: 1099, mana: 1070}
 	];
 	// Cooldowns list
@@ -180,10 +189,18 @@ $(document).ready(function()
 	initFight(); //starts the fight
 	initAI();
 	initButton();
+	initCDs();
 
 	// Handle Keyboard inputs
 	$(document).keydown(function(event)
 	{
+		console.log(event.which);
+		// Prevent f1
+		if(event.which === 112)
+		{
+			event.preventDefault();
+		}
+
 		// Cancel Heals
 		if(event.which === 87)
 		{
@@ -202,7 +219,7 @@ $(document).ready(function()
 			isCancelled = true;
 		}
 		// Use Cooldowns
-		if(event.which === 49)
+		if(event.which === 112)
 		{
 			if(isRunning)
 			{
@@ -240,7 +257,7 @@ $(document).ready(function()
 				}
 			}
 		}
-		if(event.which === 50)
+		if(event.which === 113)
 		{
 			if(isRunning)
 			{
@@ -756,8 +773,11 @@ $(document).ready(function()
 			if(!isRunning)
 			{
 				isRunning = true;
-				startMainTimer();
 				var sim_timer = simTimer.val();
+				startMainTimer(sim_timer);
+				playerClass = $('#healer_class_dropdown').val();
+				maxMana = $('#mana').val();
+				mana = maxMana;
 				setTimeout(function()
 				{
 					clearInterval(warning_interval);
@@ -766,11 +786,14 @@ $(document).ready(function()
 					clearInterval(allTargetsInterval);
 					clearInterval(multiTargetInterval);
 					clearInterval(healing_interval);
+					clearInterval(mp5_interval);
+					clearInterval(mp5_global);
 					isRunning = false;
 				}, sim_timer * 1000);
 				startAIHealing();
 				initHealingStats();
 				bossPickTarget();
+				initMp5();
 				$.each(boss_abilities, function(x, val)
 				{
 					var selected_boss = $('#bosses').val();
@@ -783,15 +806,20 @@ $(document).ready(function()
 		});
 	}
 
-	function startMainTimer()
+	function startMainTimer(sim_timer)
 	{
 		var secs = 0;
+		var fight_progress = $('.fight_progress');
+		var fight_progress_text = $('.fight_percent');
 		setInterval(function()
 		{
 			if(secs > 0 && isRunning)
 			{
 				var hps = Math.floor(playerHealingDone / (secs/10));
 				$('.player_hps').text(hps.toString() + "HPS");
+				var fight_percent = (((sim_timer - (secs / 10)) / sim_timer) * 100);
+				fight_progress.width(fight_percent + "%");
+				fight_progress_text.text(Math.floor(fight_percent) + "%");
 			}
 			secs++;
 		}, 100);
@@ -1181,204 +1209,13 @@ $(document).ready(function()
 	{
 		if(!isCasting)
 		{
-			var pnls = [$($('.h_panel')[25]), $($('.h_panel')[26]), $($('.h_panel')[27]), $($('.h_panel')[28]), $($('.h_panel')[29])];
-			var ids = [25, 26, 27, 28, 29];
-			var plyrs = [players[25], players[26], players[27], players[28], players[29]];
-
-			var player = players[ind];
-			isCasting = true;
-
-			if(scrollsOfBlindingLightActive)
+			if(mana > fullSpell.mana)
 			{
-				castTime = (((castTime / 1000) / ((33 / 100) + 1)) * 1000);
-			}
+				var pnls = [$($('.h_panel')[25]), $($('.h_panel')[26]), $($('.h_panel')[27]), $($('.h_panel')[28]), $($('.h_panel')[29])];
+				var ids = [25, 26, 27, 28, 29];
+				var plyrs = [players[25], players[26], players[27], players[28], players[29]];
 
-			var cTime = (castTime / 1000).toFixed(2) + "s";
-
-			var pnl1 = $(pnls[0].find('.incoming_container'));
-			var pnl2 = pnls[1].find('.incoming_container');
-			var pnl3 = pnls[2].find('.incoming_container');
-			var pnl4 = pnls[3].find('.incoming_container');
-			var pnl5 = pnls[4].find('.incoming_container');
-
-			var incDivCount1 = pnl1.find('.incoming').length;
-			var incDivCount2 = pnl2.find('.incoming').length;
-			var incDivCount3 = pnl3.find('.incoming').length;
-			var incDivCount4 = pnl4.find('.incoming').length;
-			var incDivCount5 = pnl5.find('.incoming').length;
-
-			var incDivClass1 = "incoming"+incDivCount1.toString();
-			var incDivClass2 = "incoming"+incDivCount2.toString();
-			var incDivClass3 = "incoming"+incDivCount3.toString();
-			var incDivClass4 = "incoming"+incDivCount4.toString();
-			var incDivClass5 = "incoming"+incDivCount5.toString();
-
-			var incDivClassFinal1 = "incoming "+incDivClass1;
-			var incDivClassFinal2 = "incoming "+incDivClass2;
-			var incDivClassFinal3 = "incoming "+incDivClass3;
-			var incDivClassFinal4 = "incoming "+incDivClass4;
-			var incDivClassFinal5 = "incoming "+incDivClass5;
-
-			var incDiv1 = '<div class="' + incDivClassFinal1 +'"></div>';
-			var incDiv2 = '<div class="' + incDivClassFinal2 +'"></div>';
-			var incDiv3 = '<div class="' + incDivClassFinal3 +'"></div>';
-			var incDiv4 = '<div class="' + incDivClassFinal4 +'"></div>';
-			var incDiv5 = '<div class="' + incDivClassFinal5 +'"></div>';
-
-			var incDivToRemove1;
-			var incDivToRemove2;
-			var incDivToRemove3;
-			var incDivToRemove4;
-			var incDivToRemove5;
-
-			pnl1.append(incDiv1);
-			pnl2.append(incDiv2);
-			pnl3.append(incDiv3);
-			pnl4.append(incDiv4);
-			pnl5.append(incDiv5);
-
-			var inc1 = pnl1.find('.'+incDivClass1);
-			var inc2 = pnl2.find('.'+incDivClass2);
-			var inc3 = pnl3.find('.'+incDivClass3);
-			var inc4 = pnl4.find('.'+incDivClass4);
-			var inc5 = pnl5.find('.'+incDivClass5);
-
-			incDivToRemove1 = inc1;
-			incDivToRemove2 = inc2;
-			incDivToRemove3 = inc3;
-			incDivToRemove4 = inc4;
-			incDivToRemove5 = inc5;
-
-			var incPerc1 = (((healAmount.heal / plyrs[0].healthMax) * 50) + "%");
-			var incPerc2 = (((healAmount.heal / plyrs[1].healthMax) * 50) + "%");
-			var incPerc3 = (((healAmount.heal / plyrs[2].healthMax) * 50) + "%");
-			var incPerc4 = (((healAmount.heal / plyrs[3].healthMax) * 50) + "%");
-			var incPerc5 = (((healAmount.heal / plyrs[4].healthMax) * 50) + "%");
-
-			inc1.css('width', incPerc1);
-			inc2.css('width', incPerc2);
-			inc3.css('width', incPerc3);
-			inc4.css('width', incPerc4);
-			inc5.css('width', incPerc5);
-
-			$('.cast_bar_progress').animate(
-			{
-				width: '100%'
-			},
-			{
-				duration: castTime,
-				easing: 'linear',
-				start: function()
-				{
-					$('.cast_bar').css({background: '#000000'});
-					$('.cast_bar_text').text("Casting " + castingSpell + " - " + cTime);
-				},
-				step: function()
-				{
-					
-				},
-				// Cancel Cast
-				progress: function()
-				{
-					if(isCancelled)
-					{
-						$('.cast_bar_progress').css({width: 0});
-						$('.cast_bar_text').text("");
-						$('.cast_bar').css({background: 'transparent'});
-						isCasting = false;
-						pnl1.find('.incoming').remove();
-						pnl2.find('.incoming').remove();
-						pnl3.find('.incoming').remove();
-						pnl4.find('.incoming').remove();
-						pnl5.find('.incoming').remove();
-						$(this).stop(false, false);
-						isCancelled = false;
-					}
-				},
-				complete: function()
-				{
-					isCasting = false;
-					$('.cast_bar_progress').css({width: 0});
-
-					$.each(plyrs, function(plID, pl)
-					{
-						player = pl;
-						if(player.status === "alive")
-						{
-							var currentHealth = player.health;
-							var maxHealth = player.healthMax;
-							var overheal = 0;
-							var actualHealAmount = 0;
-							var newHealth = currentHealth + healAmount.heal;
-							if(newHealth > maxHealth)
-							{
-								overheal = newHealth - maxHealth;
-								actualHealAmount = healAmount.heal - overheal;
-								newHealth = maxHealth;
-							}
-							else
-							{
-								actualHealAmount = Math.ceil(healAmount.heal);
-								newHealth = currentHealth + healAmount.heal;
-							}
-
-							playerHealingDone = playerHealingDone + actualHealAmount;
-							players[29].healingDone = playerHealingDone;
-							player.health = newHealth;
-							updatePanels(player);
-							showMyHeal(actualHealAmount, healAmount.crit);
-							var isCrit = healAmount.crit;
-							var outputLine = "";
-							if(!isCrit)
-							{
-								outputLine = player.name + " got healed for " + actualHealAmount + " by Player";
-							}
-							else
-							{
-								outputLine = player.name + " got healed for " + actualHealAmount + " (Crit!) by Player";
-							}
-							$('.cast_bar_text').text("");
-							$('.cast_bar').css({background: 'transparent'});
-							if(overheal > 0)
-							{
-								output.prepend(outputLine + " (" + overheal + " overhealed)" + "\n  by Player");
-							}
-							else
-							{
-								output.prepend(outputLine + "\n");
-							}
-
-							incDivToRemove1.remove();
-							incDivToRemove2.remove();
-							incDivToRemove3.remove();
-							incDivToRemove4.remove();
-							incDivToRemove5.remove();
-						}
-					});	
-				}
-			})
-			.animate(
-				{
-					width: '0%'
-				},
-				{
-					duration: 0
-				});	
-		}
-	}
-
-	function initHeal(pnl, i, castTime, healAmount, fullSpell)
-	{
-		if(!isCasting)
-		{
-			// If cast time is 0, it's a HoT
-			if(castTime === 0)
-			{
-				addHot(pnl, i, healAmount, fullSpell);
-			}
-			else
-			{
-				var player = players[i];
+				var player = players[ind];
 				isCasting = true;
 
 				if(scrollsOfBlindingLightActive)
@@ -1386,20 +1223,74 @@ $(document).ready(function()
 					castTime = (((castTime / 1000) / ((33 / 100) + 1)) * 1000);
 				}
 
+				var manaCost = fullSpell.mana;
 				var cTime = (castTime / 1000).toFixed(2) + "s";
-				var tempMaxHealth = player.healthMax;
-				pnl = pnl.find('.incoming_container');
-				var currentInc = 0;
-				var incDivCount = pnl.find('.incoming').length;
-				var incDivClass = "incoming"+incDivCount.toString();
-				var incDivClassFinal = "incoming "+incDivClass;
-				var incDiv = '<div class="' + incDivClassFinal +'"></div>';
-				var incDivToRemove;
-				pnl.append(incDiv);
-				var inc = pnl.find('.'+incDivClass);
-				incDivToRemove = inc;
-				var incPerc = (((healAmount.heal / tempMaxHealth) * 50) + "%");
-				inc.css('width', incPerc);
+
+				var pnl1 = $(pnls[0].find('.incoming_container'));
+				var pnl2 = pnls[1].find('.incoming_container');
+				var pnl3 = pnls[2].find('.incoming_container');
+				var pnl4 = pnls[3].find('.incoming_container');
+				var pnl5 = pnls[4].find('.incoming_container');
+
+				var incDivCount1 = pnl1.find('.incoming').length;
+				var incDivCount2 = pnl2.find('.incoming').length;
+				var incDivCount3 = pnl3.find('.incoming').length;
+				var incDivCount4 = pnl4.find('.incoming').length;
+				var incDivCount5 = pnl5.find('.incoming').length;
+
+				var incDivClass1 = "incoming"+incDivCount1.toString();
+				var incDivClass2 = "incoming"+incDivCount2.toString();
+				var incDivClass3 = "incoming"+incDivCount3.toString();
+				var incDivClass4 = "incoming"+incDivCount4.toString();
+				var incDivClass5 = "incoming"+incDivCount5.toString();
+
+				var incDivClassFinal1 = "incoming "+incDivClass1;
+				var incDivClassFinal2 = "incoming "+incDivClass2;
+				var incDivClassFinal3 = "incoming "+incDivClass3;
+				var incDivClassFinal4 = "incoming "+incDivClass4;
+				var incDivClassFinal5 = "incoming "+incDivClass5;
+
+				var incDiv1 = '<div class="' + incDivClassFinal1 +'"></div>';
+				var incDiv2 = '<div class="' + incDivClassFinal2 +'"></div>';
+				var incDiv3 = '<div class="' + incDivClassFinal3 +'"></div>';
+				var incDiv4 = '<div class="' + incDivClassFinal4 +'"></div>';
+				var incDiv5 = '<div class="' + incDivClassFinal5 +'"></div>';
+
+				var incDivToRemove1;
+				var incDivToRemove2;
+				var incDivToRemove3;
+				var incDivToRemove4;
+				var incDivToRemove5;
+
+				pnl1.append(incDiv1);
+				pnl2.append(incDiv2);
+				pnl3.append(incDiv3);
+				pnl4.append(incDiv4);
+				pnl5.append(incDiv5);
+
+				var inc1 = pnl1.find('.'+incDivClass1);
+				var inc2 = pnl2.find('.'+incDivClass2);
+				var inc3 = pnl3.find('.'+incDivClass3);
+				var inc4 = pnl4.find('.'+incDivClass4);
+				var inc5 = pnl5.find('.'+incDivClass5);
+
+				incDivToRemove1 = inc1;
+				incDivToRemove2 = inc2;
+				incDivToRemove3 = inc3;
+				incDivToRemove4 = inc4;
+				incDivToRemove5 = inc5;
+
+				var incPerc1 = (((healAmount.heal / plyrs[0].healthMax) * 50) + "%");
+				var incPerc2 = (((healAmount.heal / plyrs[1].healthMax) * 50) + "%");
+				var incPerc3 = (((healAmount.heal / plyrs[2].healthMax) * 50) + "%");
+				var incPerc4 = (((healAmount.heal / plyrs[3].healthMax) * 50) + "%");
+				var incPerc5 = (((healAmount.heal / plyrs[4].healthMax) * 50) + "%");
+
+				inc1.css('width', incPerc1);
+				inc2.css('width', incPerc2);
+				inc3.css('width', incPerc3);
+				inc4.css('width', incPerc4);
+				inc5.css('width', incPerc5);
 
 				$('.cast_bar_progress').animate(
 				{
@@ -1415,26 +1306,22 @@ $(document).ready(function()
 					},
 					step: function()
 					{
-						// if(player.status !== "alive")
-						// {
-						// 	$('.cast_bar_progress').css({width: 0});
-						// 	$('.cast_bar_text').text("");
-						// 	$('.cast_bar').css({background: 'transparent'});
-						// 	isCasting = false;
-						// 	pnl.find('.incoming').remove();
-						// 	$(this).stop(false, false);
-						// }
+						
 					},
 					// Cancel Cast
 					progress: function()
 					{
-						if(isCancelled || player.status !== "alive")
+						if(isCancelled)
 						{
 							$('.cast_bar_progress').css({width: 0});
 							$('.cast_bar_text').text("");
 							$('.cast_bar').css({background: 'transparent'});
 							isCasting = false;
-							pnl.find('.incoming').remove();
+							pnl1.find('.incoming').remove();
+							pnl2.find('.incoming').remove();
+							pnl3.find('.incoming').remove();
+							pnl4.find('.incoming').remove();
+							pnl5.find('.incoming').remove();
 							$(this).stop(false, false);
 							isCancelled = false;
 						}
@@ -1443,68 +1330,244 @@ $(document).ready(function()
 					{
 						isCasting = false;
 						$('.cast_bar_progress').css({width: 0});
-						if(player.status === "alive")
+
+						//Mana
+						mana = mana - manaCost;
+						updateMana();
+						clearInterval(mp5_global);
+						startMp5Rule();
+
+						$.each(plyrs, function(plID, pl)
 						{
-							var currentHealth = player.health;
-							var maxHealth = player.healthMax;
-							var overheal = 0;
-							var actualHealAmount = 0;
-							var newHealth = currentHealth + healAmount.heal;
-							if(newHealth > maxHealth)
+							player = pl;
+							if(player.status === "alive")
 							{
-								overheal = newHealth - maxHealth;
-								actualHealAmount = healAmount.heal - overheal;
-								newHealth = maxHealth;
-							}
-							else
-							{
-								actualHealAmount = Math.ceil(healAmount.heal);
-								newHealth = currentHealth + healAmount.heal;
-							}
+								var currentHealth = player.health;
+								var maxHealth = player.healthMax;
+								var overheal = 0;
+								var actualHealAmount = 0;
+								var newHealth = currentHealth + healAmount.heal;
+								if(newHealth > maxHealth)
+								{
+									overheal = newHealth - maxHealth;
+									actualHealAmount = healAmount.heal - overheal;
+									newHealth = maxHealth;
+								}
+								else
+								{
+									actualHealAmount = Math.ceil(healAmount.heal);
+									newHealth = currentHealth + healAmount.heal;
+								}
 
-							playerHealingDone = playerHealingDone + actualHealAmount;
-							players[29].healingDone = playerHealingDone;
-							player.health = newHealth;
-							updatePanels(player);
-							showMyHeal(actualHealAmount, healAmount.crit);
-							var isCrit = healAmount.crit;
-							var outputLine = "";
-							if(!isCrit)
-							{
-								outputLine = player.name + " got healed for " + actualHealAmount + " by Player";
-							}
-							else
-							{
-								outputLine = player.name + " got healed for " + actualHealAmount + " (Crit!) by Player";
-							}
-							$('.cast_bar_text').text("");
-							$('.cast_bar').css({background: 'transparent'});
-							if(overheal > 0)
-							{
-								output.prepend(outputLine + " (" + overheal + " overhealed)" + "\n  by Player");
-							}
-							else
-							{
-								output.prepend(outputLine + "\n");
-							}
+								playerHealingDone = playerHealingDone + actualHealAmount;
+								players[29].healingDone = playerHealingDone;
+								player.health = newHealth;
+								updatePanels(player);
+								showMyHeal(actualHealAmount, healAmount.crit);
+								var isCrit = healAmount.crit;
+								var outputLine = "";
+								if(!isCrit)
+								{
+									outputLine = player.name + " got healed for " + actualHealAmount + " by Player";
+								}
+								else
+								{
+									outputLine = player.name + " got healed for " + actualHealAmount + " (Crit!) by Player";
+								}
+								$('.cast_bar_text').text("");
+								$('.cast_bar').css({background: 'transparent'});
+								if(overheal > 0)
+								{
+									output.prepend(outputLine + " (" + overheal + " overhealed)" + "\n  by Player");
+								}
+								else
+								{
+									output.prepend(outputLine + "\n");
+								}
 
-							incDivToRemove.remove();
-						}
-							
+								incDivToRemove1.remove();
+								incDivToRemove2.remove();
+								incDivToRemove3.remove();
+								incDivToRemove4.remove();
+								incDivToRemove5.remove();
+							}
+						});	
 					}
 				})
 				.animate(
-					{
-						width: '0%'
-					},
-					{
-						duration: 0
-					});
+				{
+					width: '0%'
+				},
+				{
+					duration: 0
+				});	
 			}	
 		}
 	}
 
-	function addHot(pnl, i, healAmount, fullSpell)
+	function initHeal(pnl, i, castTime, healAmount, fullSpell)
+	{
+		if(!isCasting)
+		{
+			if(mana > fullSpell.mana)
+			{
+				// If cast time is 0, it's a HoT
+				if(castTime === 0)
+				{
+					addHot(pnl, i, healAmount, fullSpell, true);
+				}
+				else
+				{
+					var player = players[i];
+					isCasting = true;
+
+					if(scrollsOfBlindingLightActive)
+					{
+						castTime = (((castTime / 1000) / ((33 / 100) + 1)) * 1000);
+					}
+
+					var originalPnl = pnl;
+					var manaCost = fullSpell.mana;
+					var cTime = (castTime / 1000).toFixed(2) + "s";
+					var tempMaxHealth = player.healthMax;
+					pnl = pnl.find('.incoming_container');
+					var currentInc = 0;
+					var incDivCount = pnl.find('.incoming').length;
+					var incDivClass = "incoming"+incDivCount.toString();
+					var incDivClassFinal = "incoming "+incDivClass;
+					var incDiv = '<div class="' + incDivClassFinal +'"></div>';
+					var incDivToRemove;
+					pnl.append(incDiv);
+					var inc = pnl.find('.'+incDivClass);
+					incDivToRemove = inc;
+					var incPerc = (((healAmount.heal / tempMaxHealth) * 50) + "%");
+					inc.css('width', incPerc);
+
+					$('.cast_bar_progress').animate(
+					{
+						width: '100%'
+					},
+					{
+						duration: castTime,
+						easing: 'linear',
+						start: function()
+						{
+							$('.cast_bar').css({background: '#000000'});
+							$('.cast_bar_text').text("Casting " + castingSpell + " - " + cTime);
+						},
+						step: function()
+						{
+							// if(player.status !== "alive")
+							// {
+							// 	$('.cast_bar_progress').css({width: 0});
+							// 	$('.cast_bar_text').text("");
+							// 	$('.cast_bar').css({background: 'transparent'});
+							// 	isCasting = false;
+							// 	pnl.find('.incoming').remove();
+							// 	$(this).stop(false, false);
+							// }
+						},
+						// Cancel Cast
+						progress: function()
+						{
+							if(isCancelled || player.status !== "alive")
+							{
+								$('.cast_bar_progress').css({width: 0});
+								$('.cast_bar_text').text("");
+								$('.cast_bar').css({background: 'transparent'});
+								isCasting = false;
+								pnl.find('.incoming').remove();
+								$(this).stop(false, false);
+								isCancelled = false;
+							}
+						},
+						complete: function()
+						{
+							isCasting = false;
+							$('.cast_bar_progress').css({width: 0});
+							if(player.status === "alive")
+							{
+								var currentHealth = player.health;
+								var maxHealth = player.healthMax;
+								var overheal = 0;
+								var actualHealAmount = 0;
+								var newHealth = currentHealth + healAmount.heal;
+								if(newHealth > maxHealth)
+								{
+									overheal = newHealth - maxHealth;
+									actualHealAmount = healAmount.heal - overheal;
+									newHealth = maxHealth;
+								}
+								else
+								{
+									actualHealAmount = Math.ceil(healAmount.heal);
+									newHealth = currentHealth + healAmount.heal;
+								}
+
+								// No mana cost for paladin crits (--fix to add mana after cast instead)
+								if(playerClass === "paladin" && healAmount.crit)
+								{
+
+								}
+								else
+								{
+									mana = mana - manaCost;
+									updateMana();
+								}
+
+								clearInterval(mp5_global);
+								startMp5Rule();
+								playerHealingDone = playerHealingDone + actualHealAmount;
+								players[29].healingDone = playerHealingDone;
+								player.health = newHealth;
+								updatePanels(player);
+								showMyHeal(actualHealAmount, healAmount.crit);
+								var isCrit = healAmount.crit;
+								var outputLine = "";
+								if(!isCrit)
+								{
+									outputLine = player.name + " got healed for " + actualHealAmount + " by Player";
+								}
+								else
+								{
+									outputLine = player.name + " got healed for " + actualHealAmount + " (Crit!) by Player";
+								}
+								$('.cast_bar_text').text("");
+								$('.cast_bar').css({background: 'transparent'});
+								if(overheal > 0)
+								{
+									output.prepend(outputLine + " (" + overheal + " overhealed)" + "\n  by Player");
+								}
+								else
+								{
+									output.prepend(outputLine + "\n");
+								}
+
+								incDivToRemove.remove();
+
+								// if Greater heal add rank 5 renew
+								if(fullSpell.name.indexOf("Greater Heal") >= 0)
+								{
+									var xSpell = {class: 'priest', name: 'Renew (Rank 5)', castTime: 0, min: 315, max: 315, duration: 15, interval: 3, mana: 170};
+									addHot(originalPnl, i, getHealAmount(xSpell, "player"), xSpell, false);
+								}
+							}
+								
+						}
+					})
+					.animate(
+						{
+							width: '0%'
+						},
+						{
+							duration: 0
+						});
+				}
+			}	
+		}
+	}
+
+	function addHot(pnl, i, healAmount, fullSpell, gcd)
 	{
 		var player = players[i];
 		if(player.status === "alive")
@@ -1512,6 +1575,10 @@ $(document).ready(function()
 			// Create hot icon and add it to the panel if hot does not already exist
 			var hotClass = 'hot';
 			var hotName = fullSpell.name.split(' ')[0].toLowerCase();
+			if(!gcd)
+			{
+				hotName = "gh";
+			}
 			healAmount.heal = Math.ceil(healAmount.heal / (fullSpell.duration / fullSpell.interval));
 			if($(pnl).find('.' + hotName).length > 0)
 			{
@@ -1523,18 +1590,22 @@ $(document).ready(function()
 			}
 			else
 			{
-				isCasting = true;
+				if(gcd)
+				{
+					isCasting = true;
+					setTimeout(function()
+					{
+						isCasting = false;
+					}, 1500);
+				}
 				var hotIcon = '<div class="' + hotClass + ' ' + hotName + '"></div>';
 				$(pnl).append(hotIcon);
-				setTimeout(function()
-				{
-					isCasting = false;
-				}, 1500);
 				setTimeout(function()
 				{
 					pnl.find('.' + hotName).remove();
 				}, fullSpell.duration * 1000);
 
+				var manaCost = fullSpell.mana;
 				var tempMaxHealth = player.healthMax;
 				var currentHealth = player.health;
 				var maxHealth = player.healthMax;
@@ -1549,6 +1620,15 @@ $(document).ready(function()
 				incDivToRemove = inc;
 				var incPerc = (((healAmount.heal / tempMaxHealth) * 50) + "%");
 				inc.css('width', incPerc);
+
+				//Mana - do not subtract if greater heal
+				if(gcd)
+				{
+					mana = mana - manaCost;
+					updateMana();
+					clearInterval(mp5_global);
+					startMp5Rule();
+				}
 
 				// HoT interval
 				var hotInterval = setInterval(function()
@@ -1899,6 +1979,102 @@ $(document).ready(function()
 				healingStatsOutput.text(healingOutputText);
 			});
 		}, 1000);
+	}
+
+	function initMp5()
+	{
+		mp5_interval = setInterval(function()
+		{
+			mana = mana + mp5;
+			if(mana >= maxMana)
+			{
+				mana = maxMana;
+			}
+			updateMana();
+		}, 5000);
+	}
+
+	function startMp5Rule()
+	{
+		if(playerClass === "priest")
+		{
+			mp5 = 160;
+		}
+		else
+		{
+			mp5 = 60;
+		}
+		mp5_global = setInterval(function()
+		{
+			if(playerClass === "priest")
+			{
+				mp5 = 400;
+			}
+			else
+			{
+				mp5 = 240;
+			}
+		}, 5000);
+	}
+
+	function updateMana()
+	{
+		$('.mana').text(mana);
+		var manaPerc = (mana / maxMana) * 100;
+		$('.mana_background').css("width", manaPerc + "%");
+	}
+
+	function initCDs()
+	{
+		manaPot.on('click', function()
+		{
+			var potMana = Math.floor(Math.random() * (2250 - 1350 + 1)) + 1350;
+			mana = mana + potMana;
+			if(mana >= maxMana)
+			{
+				mana = maxMana;
+			}
+			updateMana();
+			manaPot.css("pointerEvents", "none");
+			$('.mana_pot_cd').css("opacity", "1");
+			var x = 120;
+			var manaPotInterval = setInterval(function()
+			{
+				x--;
+				$('.mana_pot_cd').text(x);
+			}, 1000);
+			setTimeout(function()
+			{
+				manaPot.css("pointerEvents", "auto");
+				$('.mana_pot_cd').css("opacity", "0");
+				clearInterval(manaPotInterval);
+			},120000);
+		});
+
+		rune.on('click', function()
+		{
+			var runeMana = Math.floor(Math.random() * (1500 - 900 + 1)) + 900;
+			mana = mana + runeMana;
+			if(mana >= maxMana)
+			{
+				mana = maxMana;
+			}
+			updateMana();
+			rune.css("pointerEvents", "none");
+			$('.rune_cd').css("opacity", "1");
+			var x = 120;
+			var runeInterval = setInterval(function()
+			{
+				x--;
+				$('.rune_cd').text(x);
+			}, 1000);
+			setTimeout(function()
+			{
+				rune.css("pointerEvents", "auto");
+				$('.rune_cd').css("opacity", "0");
+				clearInterval(runeInterval);
+			},120000);
+		});
 	}
 
 });
